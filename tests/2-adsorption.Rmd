@@ -1,6 +1,5 @@
 ---
 title: "adsorption tests"
-author: "Kaizad F. Patel"
 output: github_document
 ---
 **Testing adsorption of organic substrate on clay minerals.**

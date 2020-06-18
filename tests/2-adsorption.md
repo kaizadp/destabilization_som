@@ -1,6 +1,5 @@
 adsorption tests
 ================
-Kaizad F. Patel
 
 **Testing adsorption of organic substrate on clay minerals.**
 

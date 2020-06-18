@@ -1,0 +1,206 @@
+---
+title: "isotope calculations"
+output: github_document
+---
+Calculations for isotope enrichment.  
+Change input parameters for soil (step 1) and for substrate (step 3). 
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+soil name: Palouse  
+45/44-R: 0.0188  
+TC = 2 %  
+
+
+
+```{r}
+## INPUT VARIABLES FOR SOIL 
+
+soil_name = "MOPANG"
+R_45_44 = 0.0191 # 45/44 isotope ratio
+core_wt = 100 # grams
+soil_tc = 0.09 # total carbon 9 %
+soil_weoc = 0.06 # water-extractable organic carbon, mg C/g soil
+```
+
+#### step 1: how much carbon to add?
+
+in a `r core_wt`-g core,  
+total carbon = `r core_wt*soil_tc` g.  
+WEOC =  `r soil_weoc*core_wt` mgC.  
+
+if we add C substrate equivalent to the WEOC,  
+we **add `r soil_weoc*core_wt` mg C** to the `r core_wt`-g core.
+
+---
+
+#### step 2: what enrichment do we want for the added carbon?
+We want our final enrichmment in the soil = 0.1 (i.e. 10 %).  
+So how much enriched substrate do we need to add?  
+```{r}
+AT = 0.10 # target enrichment
+A1 = R_45_44 # R-value for initial soil
+# A2 = ?
+
+M1 = soil_weoc * core_wt # initial C, grams
+M2 = soil_weoc*core_wt # added C, grams
+```
+
+AT = ((A1 x M1) + (A2 x M2)) / (M1 + M2)  
+so 
+A2  = ((AT x (M1+M2)) - (A1 x M1)) / M2  
+```{r}
+A2 = ((AT *(M1+M2)) - (A1*M1))/M2
+print(A2)
+```
+
+**so we need to add `r M2` mg C at `r A2` enrichment.**
+
+---
+
+#### step 3: how will we prepare this enriched substrate?
+
+we will mix labelled + unlabelled substrate to get this value
+
+## substrate 1: dextrose
+
+```{r dextrose}
+## INPUT VARIABLES FOR SUBSTRATE
+substrate = "DEXTROSE"
+A_labelled = 0.99
+A_unlabelled = 0.0191 # assuming for now
+
+mole_substrate = (12*6) + (1*12) + (16*6) # molar weight of substrate
+mole_carbon = 12* 6 # molar weight of carbon in substrate
+carbon_atoms = 6
+c_fraction = mole_carbon/mole_substrate
+```
+
+How much labelled + unlabelled substrate should we mix to get the target enrichment?
+
+M_labelled + M_unlabelled = M2  
+
+M_unlabelled = `r M2` - M_labelled  
+
+solve for M_labelled
+
+A2 = ((A_labelled x M_labelled) + (A_unlabelled x M_unlabelled)) / (M_labelled + M_unlabelled)  
+```{r label}
+M_labelled = ((A2*M2) - (A_unlabelled*M2)) / (A_labelled - A_unlabelled)
+M_unlabelled = M2 - M_labelled
+print(M_labelled)
+print(M_unlabelled)
+```
+
+**so, we will mix `r round(M_labelled,2)` mg of `r A_labelled` enriched CARBON with `r round(M_unlabelled,2)` mg of unlabelled CARBON (`r A_unlabelled` enriched),**  
+
+our substrate is `r substrate`,  
+where `r mole_carbon` g C corresponds to `r mole_substrate` g substrate.  
+
+---  
+
+#### conclusion
+**so, we will mix `r round(M_labelled/c_fraction,2)` mg of `r A_labelled` enriched substrate with `r round(M_unlabelled/c_fraction,2)` mg of unlabelled substrate (`r A_unlabelled` enriched),**  
+**to get `r M2/c_fraction` mg of `r A2` enriched substrate -- for a `r core_wt`-g soil core.**
+
+---
+
+## substrate 2: salicylic acid
+
+```{r sal}
+## INPUT VARIABLES FOR SUBSTRATE
+substrate = "SALICYLIC ACID"
+A_labelled = 0.99
+A_unlabelled = 0.0191 # assuming for now
+
+mole_substrate = (12*7) + (1*6) + (16*3) # molar weight of substrate
+mole_carbon = 12* 7 # molar weight of carbon in substrate
+carbon_atoms = 7
+c_fraction = mole_carbon/mole_substrate
+```
+
+How much labelled + unlabelled substrate should we mix to get the target enrichment?
+
+M_labelled + M_unlabelled = M2  
+
+M_unlabelled = `r M2` - M_labelled  
+
+solve for M_labelled
+
+A2 = ((A_labelled x M_labelled) + (A_unlabelled x M_unlabelled)) / (M_labelled + M_unlabelled)  
+```{r label2}
+M_labelled = ((A2*M2) - (A_unlabelled*M2)) / (A_labelled - A_unlabelled)
+M_unlabelled = M2 - M_labelled
+print(M_labelled)
+print(M_unlabelled)
+```
+
+**so, we will mix `r round(M_labelled,2)` mg of `r A_labelled` enriched CARBON with `r round(M_unlabelled,2)` mg of unlabelled CARBON (`r A_unlabelled` enriched),**  
+
+our substrate is `r substrate`,  
+where `r mole_carbon` g C corresponds to `r mole_substrate` g substrate.  
+
+---  
+
+#### conclusion
+**so, we will mix `r round(M_labelled/c_fraction,2)` mg of `r A_labelled` enriched substrate with `r round(M_unlabelled/c_fraction,2)` mg of unlabelled substrate (`r A_unlabelled` enriched),**  
+**to get `r M2/c_fraction` mg of `r A2` enriched substrate -- for a `r core_wt`-g soil core.**
+
+
+---
+
+## substrate 3: oxalic acid
+
+```{r oxalic}
+## INPUT VARIABLES FOR SUBSTRATE
+substrate = "OXALIC ACID"
+A_labelled = 0.99
+A_unlabelled = 0.0191 # assuming for now
+
+mole_substrate = (12*2) + (1*2) + (16*4) # molar weight of substrate
+mole_carbon = 12* 2 # molar weight of carbon in substrate
+carbon_atoms = 2
+c_fraction = mole_carbon/mole_substrate
+```
+
+How much labelled + unlabelled substrate should we mix to get the target enrichment?
+
+M_labelled + M_unlabelled = M2  
+
+M_unlabelled = `r M2` - M_labelled  
+
+solve for M_labelled
+
+A2 = ((A_labelled x M_labelled) + (A_unlabelled x M_unlabelled)) / (M_labelled + M_unlabelled)  
+```{r label3}
+M_labelled = ((A2*M2) - (A_unlabelled*M2)) / (A_labelled - A_unlabelled)
+M_unlabelled = M2 - M_labelled
+print(M_labelled)
+print(M_unlabelled)
+```
+
+**so, we will mix `r round(M_labelled,2)` mg of `r A_labelled` enriched CARBON with `r round(M_unlabelled,2)` mg of unlabelled CARBON (`r A_unlabelled` enriched),**  
+
+our substrate is `r substrate`,  
+where `r mole_carbon` g C corresponds to `r mole_substrate` g substrate.  
+
+---  
+
+#### conclusion
+**so, we will mix `r round(M_labelled/c_fraction,2)` mg of `r A_labelled` enriched substrate with `r round(M_unlabelled/c_fraction,2)` mg of unlabelled substrate (`r A_unlabelled` enriched),**  
+**to get `r M2/c_fraction` mg of `r A2` enriched substrate -- for a `r core_wt`-g soil core.**
+
+
+----
+
+**Session Info:**  
+
+last run: `r Sys.Date()`  
+
+```{r}
+sessionInfo()
+
+```
+
