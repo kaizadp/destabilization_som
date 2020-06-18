@@ -1,0 +1,94 @@
+---
+title: "adsorption tests"
+author: "Kaizad F. Patel"
+output: github_document
+---
+**Testing adsorption of organic substrate on clay minerals.**
+
+Test 2: March 3
+
+clay = goethite  
+substrates = sodium salicylate, oxalic acid
+
+---- 
+
+### Procedure 
+
+1. Prepare 1000 ppm C solution salicylate. Prepare 500 ppm C solution oxalic acid
+2. Weigh 5 g goethite
+3. Add 1 mL, 2 mL, 5 mL, 10 mL substrate
+4. Make up volume to 20 mL
+5. Shake overnight. 250 rpm in 2H (room temperature)
+6. freeze-dry in 2226.
+7. analyze for TC on VarioMAX Cube.
+
+Test adsorption by adding an equivalent of 0, 1, 2, 5, 10 mg C to the clay. 
+
+----
+
+```{r knitrsetup, echo=FALSE, message=FALSE, warning=FALSE}
+knitr::opts_chunk$set(echo=FALSE,message=FALSE,warning=FALSE,
+                      collapse = TRUE,
+                      #fig.path = "images/",
+                      comment = "#>"
+                      )
+```
+
+
+```{r}
+library(readr)
+library(readxl)
+library(tidyr)
+library(tidyverse)
+library(dplyr)
+library(ggplot2)
+
+adsorption = read.csv("adsorption.csv")
+
+adsorption = 
+  adsorption %>% 
+  dplyr::mutate(adsorbed_temp = (adsorbed_C_perc/100)*goethite_g*1000)
+
+BLANK = adsorption$adsorbed_temp[1]
+
+adsorption = 
+  adsorption %>% 
+  dplyr::mutate(adsorbed_C_mg = adsorbed_temp - BLANK)
+```
+
+```{r}
+ggplot(adsorption, aes(x = added_C_mg, y = adsorbed_C_mg, color = substrate))+
+  geom_point()+
+  geom_smooth()
+```
+
+we want ~ 3 mg C adsorbed per 50-g core of soil.  
+so for OXALIC ACID, we add 5 mg C (round up to 6 mg C) to 5 g clay and ~3.8 mg C is adsorbed.  
+for SODIUM SALICYLATE, we add 12 mg C to 5 g clay and ~ 4 mg C is adsorbed (extrapolating).
+
+*see separate file for isotope calculations*  
+OXALIC ACID:  
+we want 1 mg labelled C + 5 mg unlabelled C  
+= 3.75 mg labelled OA + 18.75 mg unlabelled OA per soil core
+
+SALICYLIC ACID:
+we want 2 mg labelled C + 10 mg unlabelled C  
+= 3.28 mg labelled SA + 16.42 mg unlabelled SA
+
+for 100 samples, we need  
+OA, labelled: `r 3.75 * 100` mg  
+OA, unlabelled: `r 18.75 * 100` mg  
+SA, labelled: `r 3.28 * 100` mg  
+SA, unlabelled: `r 16.42 * 100` mg
+
+----
+
+**Session Info:**  
+
+last run: `r Sys.Date()`  
+
+```{r}
+sessionInfo()
+
+```
+
