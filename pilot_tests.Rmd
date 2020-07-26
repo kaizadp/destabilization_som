@@ -1,0 +1,135 @@
+---
+title: "Pilot Tests"
+output: github_document
+---
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE,
+                      warning = FALSE,
+                      message = FALSE)
+
+library(tidyverse)
+```
+
+# Experimental
+<details>
+  <summary>click to expand</summary>
+  
+## I. Soil Processing and Intitial Characterization
+
+### sieving
+sieve through 4 mm mesh.
+
+
+### gravimetric moisture
+```{r, eval=FALSE, echo=TRUE}
+wt_tin_g
+wt_tin_fmsoil_g
+wt_tin_airdried_g
+
+moisture
+```
+
+### saturation water content
+```{r, eval=FALSE, echo=TRUE}
+wt_setup_g # empty setup of ring+ mesh + saturation plate
+wt_setup_fmsoil_g
+wt_setup_fmsoil_clay_g # 5 g clay packet added
+wt_setup_saturated_g # setup + saturated soil+clay system
+wt_added_water_g = wt_setup_saturated_g - wt_setup_fmsoil_clay_g
+```
+
+## II. Preparing Oxalic Acid
+### oxalic acid mixture
+mix ?? unlabelled with ?? labelled oxalic acid
+add ?? water to dissolve and make a ?? concentration solution
+
+### adsorbing OA onto goethite
+total clay needed = `r 5 * 8` g  
+
+1. add ?? clay and ?? OA solution to each of ?? 50-mL omics-safe tubes
+1. shake on vortexer for ?? minutes
+1. centrifuge
+1. decant supernatant
+1. add ?? mL water (#1)
+1. shake on vortexer for ?? minutes
+1. centrifuge
+1. decant supernatant
+1. add ?? mL water (#2)
+1. shake on vortexer for ?? minutes
+1. centrifuge
+1. decant supernatant
+1. freeze-dry
+1. gently shake to break up large sheets of dried clay
+1. weigh 5 g of OA-clay into packets made of 100 um mesh.
+
+## III. incubation setup
+### requirements
+- sieved soil
+- prepared oxalic acid-goethite packets
+- pint-size Mason jars
+  - lids fitted with (a) Swagelok/compression unions, (b) rubber washers, (c) septa
+- 50 mL syringe + needle
+- 50 mL collection bottle + stopper + crimp seal (evacuate and seal)
+- labels for jars and bottles
+
+### procedure
+**set A: wetting** (n=3)  
+
+1. weigh 50 g ODE soil into pint-size Mason jars
+1. place the oxalic acid-goethite packet in the top 1 cm of the soil.
+2. add ?? mL Milli-Q water from above
+3. seal the jars for 48 hours at room temperature
+4. at the end of the incubation, pull 50 mL headspace and transfer to pre-evacuated bottles
+    - ship gas samples to MSL
+5. remove the oxalic acid-goethite packet
+    - transfer to 15 mL omics-safe tube
+    - freeze-dry
+    - grind
+    - analyze on Minerva for TC, 13C
+6. mix the soil well
+7. subsample for moisture
+    - weigh into aluminum tin
+    - dry in oven at 105 C for 24 hours
+8. subsample for TC, 13C
+    - weigh into 15 mL omics-safe tube
+    - freeze-dry
+    - grind
+    - analyze on Minerva
+
+**set B: drying** (n=3)  
+
+1. weigh 50 g ODE soil into pint-size Mason jars
+1. place the oxalic acid-goethite packet in the top 1 cm of the soil.
+1. air-dry until constant weight
+1. add ?? mL Milli-Q water from above
+1. seal the jars and repeat steps described above
+
+
+
+### experimental details
+
+```{r}
+expt_details = tribble(
+  ~ sample, ~ empty_wt_g, ~fm_soil_added_g,
+  1, NA, NA,
+  2, NA, NA,
+  3, NA, NA
+)
+```
+
+
+</details>
+
+# Results
+
+----
+<details>
+  <summary>Session Info</summary>
+  
+Date: `r Sys.Date()`
+
+```{r}
+sessionInfo()
+```
+
+</details>
