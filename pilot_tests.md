@@ -16,22 +16,30 @@ sieve through 4 mm mesh.
 ### gravimetric moisture
 
 ``` r
-wt_tin_g
-wt_tin_fmsoil_g
-wt_tin_airdried_g
+wt_tin_g = 0.81 
+wt_tin_fmsoil_g = 9.08
+wt_tin_airdried_g = 7.95
 
-moisture
+fieldmoisture = round(((wt_tin_fmsoil_g - wt_tin_airdried_g) / (wt_tin_airdried_g - wt_tin_g)) * 100, 2) 
 ```
+
+field moisture = 15.83 %
 
 ### saturation water content
 
 ``` r
-wt_setup_g # empty setup of ring+ mesh + saturation plate
-wt_setup_fmsoil_g
-wt_setup_fmsoil_clay_g # 5 g clay packet added
-wt_setup_saturated_g # setup + saturated soil+clay system
-wt_added_water_g = wt_setup_saturated_g - wt_setup_fmsoil_clay_g
+wt_setup_g = 240.3# empty setup of ring+ mesh + saturation plate
+wt_setup_fmsoil_g = 291.9
+wt_setup_saturated_g = 320.7 # setup + saturated soil+clay system
+wt_added_water_g = wt_setup_saturated_g - wt_setup_fmsoil_g
+
+wt_fm_g = wt_setup_fmsoil_g - wt_setup_g
+wt_od_g = wt_fm_g/((fieldmoisture/100)+1)
+wt_moisture_g = wt_fm_g - wt_od_g
+wt_saturation_water_g = wt_added_water_g + wt_moisture_g
 ```
+
+saturation water content: 8.05 g water for 10 g ODE soil
 
 ## II. Preparing Oxalic Acid
 
@@ -79,7 +87,7 @@ total clay needed = 40 g
 
 1.  weigh 50 g ODE soil into pint-size Mason jars
 2.  place the oxalic acid-goethite packet in the top 1 cm of the soil.
-3.  add ?? mL Milli-Q water from above
+3.  add 50 mL Milli-Q water from above
 4.  seal the jars for 48 hours at room temperature
 5.  at the end of the incubation, pull 50 mL headspace and transfer to
     pre-evacuated bottles
@@ -119,7 +127,7 @@ total clay needed = 40 g
 
 <summary>Session Info</summary>
 
-Date: 2020-07-25
+Date: 2020-07-27
 
     ## R version 4.0.2 (2020-06-22)
     ## Platform: x86_64-apple-darwin17.0 (64-bit)
