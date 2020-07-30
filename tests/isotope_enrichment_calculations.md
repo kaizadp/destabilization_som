@@ -10,22 +10,21 @@ TC = 2 %
 
 ``` r
 ## INPUT VARIABLES FOR SOIL 
-
-soil_name = "MOPANG"
+soil_name = "PALOUSE"
 R_45_44 = 0.0191 # 45/44 isotope ratio
-core_wt = 100 # grams
-soil_tc = 0.09 # total carbon 9 %
-soil_weoc = 0.06 # water-extractable organic carbon, mg C/g soil
+core_wt = 50 # grams
+soil_tc = mean(2.84, 2.96, 2.77)/100 # total carbon 2.8 %
+soil_weoc = 0.06 # water-extractable organic carbon, mg C/g soil # ASSUMING FOR NOW
 ```
 
 #### step 1: how much carbon to add?
 
-in a 100-g core,  
-total carbon = 9 g.  
-WEOC = 6 mgC.
+in a 50-g core,  
+total carbon = 1.42 g.  
+WEOC = 3 mgC.
 
 if we add C substrate equivalent to the WEOC,  
-we **add 6 mg C** to the 100-g core.
+we **add 3 mg C** to the 50-g core.
 
 -----
 
@@ -40,11 +39,12 @@ A1 = R_45_44 # R-value for initial soil
 # A2 = ?
 
 M1 = soil_weoc * core_wt # initial C, grams
-M2 = soil_weoc*core_wt # added C, grams
+M2 = soil_weoc * core_wt # added C, grams
 ```
 
 AT = ((A1 x M1) + (A2 x M2)) / (M1 + M2)  
-so A2 = ((AT x (M1+M2)) - (A1 x M1)) / M2
+so  
+A2 = ((AT x (M1+M2)) - (A1 x M1)) / M2
 
 ``` r
 A2 = ((AT *(M1+M2)) - (A1*M1))/M2
@@ -53,7 +53,7 @@ print(A2)
 
     ## [1] 0.1809
 
-**so we need to add 6 mg C at 0.1809 enrichment.**
+**so we need to add 3 mg C at 0.1809 enrichment.**
 
 -----
 
@@ -61,7 +61,13 @@ print(A2)
 
 we will mix labelled + unlabelled substrate to get this value
 
-## substrate 1: dextrose
+## other substrates
+
+<details>
+
+<summary>click to expand</summary>
+
+### substrate 1: dextrose
 
 ``` r
 ## INPUT VARIABLES FOR SUBSTRATE
@@ -80,7 +86,7 @@ enrichment?
 
 M\_labelled + M\_unlabelled = M2
 
-M\_unlabelled = 6 - M\_labelled
+M\_unlabelled = 3 - M\_labelled
 
 solve for M\_labelled
 
@@ -93,16 +99,16 @@ M_unlabelled = M2 - M_labelled
 print(M_labelled)
 ```
 
-    ## [1] 0.999897
+    ## [1] 0.4999485
 
 ``` r
 print(M_unlabelled)
 ```
 
-    ## [1] 5.000103
+    ## [1] 2.500051
 
-**so, we will mix 1 mg of 0.99 enriched CARBON with 5 mg of unlabelled
-CARBON (0.0191 enriched),**
+**so, we will mix 0.5 mg of 0.99 enriched CARBON with 2.5 mg of
+unlabelled CARBON (0.0191 enriched),**
 
 our substrate is DEXTROSE,  
 where 72 g C corresponds to 180 g substrate.
@@ -111,13 +117,13 @@ where 72 g C corresponds to 180 g substrate.
 
 #### conclusion
 
-**so, we will mix 2.5 mg of 0.99 enriched substrate with 12.5 mg of
+**so, we will mix 1.25 mg of 0.99 enriched substrate with 6.25 mg of
 unlabelled substrate (0.0191 enriched),**  
-**to get 15 mg of 0.1809 enriched substrate – for a 100-g soil core.**
+**to get 7.5 mg of 0.1809 enriched substrate – for a 50-g soil core.**
 
 -----
 
-## substrate 2: salicylic acid
+### substrate 2: salicylic acid
 
 ``` r
 ## INPUT VARIABLES FOR SUBSTRATE
@@ -136,7 +142,7 @@ enrichment?
 
 M\_labelled + M\_unlabelled = M2
 
-M\_unlabelled = 6 - M\_labelled
+M\_unlabelled = 3 - M\_labelled
 
 solve for M\_labelled
 
@@ -149,16 +155,16 @@ M_unlabelled = M2 - M_labelled
 print(M_labelled)
 ```
 
-    ## [1] 0.999897
+    ## [1] 0.4999485
 
 ``` r
 print(M_unlabelled)
 ```
 
-    ## [1] 5.000103
+    ## [1] 2.500051
 
-**so, we will mix 1 mg of 0.99 enriched CARBON with 5 mg of unlabelled
-CARBON (0.0191 enriched),**
+**so, we will mix 0.5 mg of 0.99 enriched CARBON with 2.5 mg of
+unlabelled CARBON (0.0191 enriched),**
 
 our substrate is SALICYLIC ACID,  
 where 84 g C corresponds to 138 g substrate.
@@ -167,10 +173,14 @@ where 84 g C corresponds to 138 g substrate.
 
 #### conclusion
 
-**so, we will mix 1.64 mg of 0.99 enriched substrate with 8.21 mg of
+**so, we will mix 0.82 mg of 0.99 enriched substrate with 4.11 mg of
 unlabelled substrate (0.0191 enriched),**  
-**to get 9.8571429 mg of 0.1809 enriched substrate – for a 100-g soil
+**to get 4.9285714 mg of 0.1809 enriched substrate – for a 50-g soil
 core.**
+
+-----
+
+</details>
 
 -----
 
@@ -180,7 +190,7 @@ core.**
 ## INPUT VARIABLES FOR SUBSTRATE
 substrate = "OXALIC ACID"
 A_labelled = 0.99
-A_unlabelled = 0.0191 # assuming for now
+A_unlabelled = 0.0121 # assuming for now
 
 mole_substrate = (12*2) + (1*2) + (16*4) # molar weight of substrate
 mole_carbon = 12* 2 # molar weight of carbon in substrate
@@ -193,7 +203,7 @@ enrichment?
 
 M\_labelled + M\_unlabelled = M2
 
-M\_unlabelled = 6 - M\_labelled
+M\_unlabelled = 3 - M\_labelled
 
 solve for M\_labelled
 
@@ -206,16 +216,16 @@ M_unlabelled = M2 - M_labelled
 print(M_labelled)
 ```
 
-    ## [1] 0.999897
+    ## [1] 0.5178444
 
 ``` r
 print(M_unlabelled)
 ```
 
-    ## [1] 5.000103
+    ## [1] 2.482156
 
-**so, we will mix 1 mg of 0.99 enriched CARBON with 5 mg of unlabelled
-CARBON (0.0191 enriched),**
+**so, we will mix 0.52 mg of 0.99 enriched CARBON with 2.48 mg of
+unlabelled CARBON (0.0121 enriched),**
 
 our substrate is OXALIC ACID,  
 where 24 g C corresponds to 90 g substrate.
@@ -224,27 +234,27 @@ where 24 g C corresponds to 90 g substrate.
 
 #### conclusion
 
-**so, we will mix 3.75 mg of 0.99 enriched substrate with 18.75 mg of
-unlabelled substrate (0.0191 enriched),**  
-**to get 22.5 mg of 0.1809 enriched substrate – for a 100-g soil core.**
+**so, we will mix 1.94 mg of 0.99 enriched substrate with 9.31 mg of
+unlabelled substrate (0.0121 enriched),**  
+**to get 11.25 mg of 0.1809 enriched substrate – for a 50-g soil core.**
 
 -----
 
 **Session Info:**
 
-last run: 2020-06-18
+last run: 2020-07-29
 
 ``` r
 sessionInfo()
 ```
 
-    ## R version 3.6.0 (2019-04-26)
-    ## Platform: x86_64-apple-darwin15.6.0 (64-bit)
-    ## Running under: macOS Mojave 10.14.6
+    ## R version 4.0.2 (2020-06-22)
+    ## Platform: x86_64-apple-darwin17.0 (64-bit)
+    ## Running under: macOS Catalina 10.15.6
     ## 
     ## Matrix products: default
-    ## BLAS:   /Library/Frameworks/R.framework/Versions/3.6/Resources/lib/libRblas.0.dylib
-    ## LAPACK: /Library/Frameworks/R.framework/Versions/3.6/Resources/lib/libRlapack.dylib
+    ## BLAS:   /Library/Frameworks/R.framework/Versions/4.0/Resources/lib/libRblas.dylib
+    ## LAPACK: /Library/Frameworks/R.framework/Versions/4.0/Resources/lib/libRlapack.dylib
     ## 
     ## locale:
     ## [1] en_US.UTF-8/en_US.UTF-8/en_US.UTF-8/C/en_US.UTF-8/en_US.UTF-8
@@ -253,7 +263,7 @@ sessionInfo()
     ## [1] stats     graphics  grDevices utils     datasets  methods   base     
     ## 
     ## loaded via a namespace (and not attached):
-    ##  [1] compiler_3.6.0  magrittr_1.5    tools_3.6.0     htmltools_0.4.0
-    ##  [5] yaml_2.2.0      Rcpp_1.0.2      stringi_1.4.3   rmarkdown_2.1  
-    ##  [9] knitr_1.25      stringr_1.4.0   xfun_0.10       digest_0.6.25  
-    ## [13] rlang_0.4.6     evaluate_0.14
+    ##  [1] compiler_4.0.2  magrittr_1.5    tools_4.0.2     htmltools_0.5.0
+    ##  [5] yaml_2.2.1      stringi_1.4.6   rmarkdown_2.3   knitr_1.29     
+    ##  [9] stringr_1.4.0   xfun_0.15       digest_0.6.25   rlang_0.4.7    
+    ## [13] evaluate_0.14

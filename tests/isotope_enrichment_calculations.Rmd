@@ -17,12 +17,11 @@ TC = 2 %
 
 ```{r}
 ## INPUT VARIABLES FOR SOIL 
-
-soil_name = "MOPANG"
+soil_name = "PALOUSE"
 R_45_44 = 0.0191 # 45/44 isotope ratio
-core_wt = 100 # grams
-soil_tc = 0.09 # total carbon 9 %
-soil_weoc = 0.06 # water-extractable organic carbon, mg C/g soil
+core_wt = 50 # grams
+soil_tc = mean(2.84, 2.96, 2.77)/100 # total carbon 2.8 %
+soil_weoc = 0.06 # water-extractable organic carbon, mg C/g soil # ASSUMING FOR NOW
 ```
 
 #### step 1: how much carbon to add?
@@ -45,11 +44,11 @@ A1 = R_45_44 # R-value for initial soil
 # A2 = ?
 
 M1 = soil_weoc * core_wt # initial C, grams
-M2 = soil_weoc*core_wt # added C, grams
+M2 = soil_weoc * core_wt # added C, grams
 ```
 
 AT = ((A1 x M1) + (A2 x M2)) / (M1 + M2)  
-so 
+so  
 A2  = ((AT x (M1+M2)) - (A1 x M1)) / M2  
 ```{r}
 A2 = ((AT *(M1+M2)) - (A1*M1))/M2
@@ -64,7 +63,13 @@ print(A2)
 
 we will mix labelled + unlabelled substrate to get this value
 
-## substrate 1: dextrose
+
+## other substrates
+
+<details>
+  <summary>click to expand</summary>
+  
+### substrate 1: dextrose
 
 ```{r dextrose}
 ## INPUT VARIABLES FOR SUBSTRATE
@@ -107,7 +112,7 @@ where `r mole_carbon` g C corresponds to `r mole_substrate` g substrate.
 
 ---
 
-## substrate 2: salicylic acid
+### substrate 2: salicylic acid
 
 ```{r sal}
 ## INPUT VARIABLES FOR SUBSTRATE
@@ -151,13 +156,19 @@ where `r mole_carbon` g C corresponds to `r mole_substrate` g substrate.
 
 ---
 
+
+</details>
+
+
+---
+
 ## substrate 3: oxalic acid
 
 ```{r oxalic}
 ## INPUT VARIABLES FOR SUBSTRATE
 substrate = "OXALIC ACID"
 A_labelled = 0.99
-A_unlabelled = 0.0191 # assuming for now
+A_unlabelled = 0.0121 # assuming for now
 
 mole_substrate = (12*2) + (1*2) + (16*4) # molar weight of substrate
 mole_carbon = 12* 2 # molar weight of carbon in substrate
