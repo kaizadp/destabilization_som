@@ -1,0 +1,25 @@
+---
+title: "WEOC test"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+library(tidyverse)
+```
+
+
+```{r}
+samples = tribble(
+  ~sample, ~fmsoil_g, ~water_mL, ~vol_extract_mL, ~ capsule_no, ~capsule_wt_mg,
+  "palouse1", 3.53, 20, 10.19, 1, 57.280,
+  "palouse2", 3.33, 20, 10.33, 2, 58.762, 
+  "khp_50ppm", NA, NA, 9.90, 3, 57.629,
+  "khp_100ppm", NA, NA, 10.62, 4, 57.899,
+  "khp_200ppm", NA, NA, 10.30, 5, 57.538
+)
+
+
+```
+
