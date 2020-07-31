@@ -45,24 +45,34 @@ saturation water content: 8.05 g water for 10 g ODE soil
 
 ### oxalic acid mixture
 
-mix ?? unlabelled with ?? labelled oxalic acid add ?? water to dissolve
-and make a ?? concentration solution
+from the [isotope-calculations
+file](https://github.com/kaizadp/destabilization_som/blob/master/tests/isotope_enrichment_calculations.md),
+
+> we will mix 1.94 mg of 0.99 labelled substrate with 9.31 mg of
+> unlabelled substrate (0.0121 enriched), to get 11.25 mg of 0.1809
+> enriched substrate – for a 30-g soil core.
+
+for 10 cores,  
+\- mix 19.4 mg of labelled substrate with 93.1 mg unlabelled substrate
+to get 112.5 mg of enriched substrate.  
+\- dissolve in 150 mL deionized mQ water
 
 ### adsorbing OA onto goethite
 
 total clay needed = 40 g
 
-1.  add ?? clay and ?? OA solution to each of ?? 50-mL omics-safe tubes
-2.  shake on vortexer for ?? minutes
-3.  centrifuge
+1.  add 10 g clay + 30 mL OA solution to each 50-mL omics-safe tube (5
+    tubes total)
+2.  shake overnight at 250 rpm at room temperature
+3.  centrifuge for 20 minutes at 2000g
 4.  decant supernatant
-5.  add ?? mL water (\#1)
-6.  shake on vortexer for ?? minutes
-7.  centrifuge
+5.  add 30 mL water (\#1)
+6.  shake on vortexer for 20 minutes
+7.  centrifuge for 20 minutes at 2000g
 8.  decant supernatant
-9.  add ?? mL water (\#2)
-10. shake on vortexer for ?? minutes
-11. centrifuge
+9.  add 30 mL water (\#2)
+10. shake on vortexer for 20 minutes
+11. centrifuge for 20 minutes at 2000g
 12. decant supernatant
 13. freeze-dry
 14. gently shake to break up large sheets of dried clay
@@ -127,7 +137,7 @@ total clay needed = 40 g
 
 <summary>Session Info</summary>
 
-Date: 2020-07-27
+Date: 2020-07-31
 
     ## R version 4.0.2 (2020-06-22)
     ## Platform: x86_64-apple-darwin17.0 (64-bit)

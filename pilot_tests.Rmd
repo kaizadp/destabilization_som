@@ -42,31 +42,38 @@ wt_fm_g = wt_setup_fmsoil_g - wt_setup_g
 wt_od_g = wt_fm_g/((fieldmoisture/100)+1)
 wt_moisture_g = wt_fm_g - wt_od_g
 wt_saturation_water_g = wt_added_water_g + wt_moisture_g
-
 ```
 
-saturation water content: `r round((wt_saturation_water_g/wt_od_g)*10,2)` g water for 10 g ODE soil
+saturation water content:  `r round((wt_saturation_water_g/wt_od_g)*10,2)` g water for 10 g ODE soil
 
 
 ## II. Preparing Oxalic Acid
+
 ### oxalic acid mixture
-mix ?? unlabelled with ?? labelled oxalic acid
-add ?? water to dissolve and make a ?? concentration solution
+from the [isotope-calculations file](https://github.com/kaizadp/destabilization_som/blob/master/tests/isotope_enrichment_calculations.md), 
+
+> we will mix 1.94 mg of 0.99 labelled substrate with 9.31 mg of unlabelled substrate (0.0121 enriched),
+to get 11.25 mg of 0.1809 enriched substrate – for a 30-g soil core.
+
+for 10 cores,   
+ - mix  `r 1.94 * 10` mg of labelled substrate with `r 9.31 *10` mg unlabelled substrate to get `r 11.25 * 10` mg of enriched substrate.  
+ - dissolve in 150 mL deionized mQ water
+
 
 ### adsorbing OA onto goethite
 total clay needed = `r 5 * 8` g  
 
-1. add ?? clay and ?? OA solution to each of ?? 50-mL omics-safe tubes
-1. shake on vortexer for ?? minutes
-1. centrifuge
+1. add 10 g clay + 30 mL OA solution to each 50-mL omics-safe tube (5 tubes total)
+1. shake overnight at 250 rpm at room temperature
+1. centrifuge for 20 minutes at 2000g
 1. decant supernatant
-1. add ?? mL water (#1)
-1. shake on vortexer for ?? minutes
-1. centrifuge
+1. add 30 mL water (#1)
+1. shake on vortexer for 20 minutes
+1. centrifuge for 20 minutes at 2000g
 1. decant supernatant
-1. add ?? mL water (#2)
-1. shake on vortexer for ?? minutes
-1. centrifuge
+1. add 30 mL water (#2)
+1. shake on vortexer for 20 minutes
+1. centrifuge for 20 minutes at 2000g
 1. decant supernatant
 1. freeze-dry
 1. gently shake to break up large sheets of dried clay
