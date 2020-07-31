@@ -19,9 +19,9 @@ TC = 2 %
 ## INPUT VARIABLES FOR SOIL 
 soil_name = "PALOUSE"
 R_45_44 = 0.0191 # 45/44 isotope ratio
-core_wt = 50 # grams
+core_wt = 30 # grams OD soil
 soil_tc = mean(2.84, 2.96, 2.77)/100 # total carbon 2.8 %
-soil_weoc = 0.06 # water-extractable organic carbon, mg C/g soil # ASSUMING FOR NOW
+soil_weoc = 0.1 # mg/g water-extractable organic carbon, 0.1 mg C/g soil
 ```
 
 #### step 1: how much carbon to add?

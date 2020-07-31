@@ -12,19 +12,19 @@ TC = 2 %
 ## INPUT VARIABLES FOR SOIL 
 soil_name = "PALOUSE"
 R_45_44 = 0.0191 # 45/44 isotope ratio
-core_wt = 50 # grams
+core_wt = 30 # grams OD soil
 soil_tc = mean(2.84, 2.96, 2.77)/100 # total carbon 2.8 %
-soil_weoc = 0.06 # water-extractable organic carbon, mg C/g soil # ASSUMING FOR NOW
+soil_weoc = 0.1 # mg/g water-extractable organic carbon, 0.1 mg C/g soil
 ```
 
 #### step 1: how much carbon to add?
 
-in a 50-g core,  
-total carbon = 1.42 g.  
+in a 30-g core,  
+total carbon = 0.852 g.  
 WEOC = 3 mgC.
 
 if we add C substrate equivalent to the WEOC,  
-we **add 3 mg C** to the 50-g core.
+we **add 3 mg C** to the 30-g core.
 
 -----
 
@@ -119,7 +119,7 @@ where 72 g C corresponds to 180 g substrate.
 
 **so, we will mix 1.25 mg of 0.99 enriched substrate with 6.25 mg of
 unlabelled substrate (0.0191 enriched),**  
-**to get 7.5 mg of 0.1809 enriched substrate – for a 50-g soil core.**
+**to get 7.5 mg of 0.1809 enriched substrate – for a 30-g soil core.**
 
 -----
 
@@ -175,7 +175,7 @@ where 84 g C corresponds to 138 g substrate.
 
 **so, we will mix 0.82 mg of 0.99 enriched substrate with 4.11 mg of
 unlabelled substrate (0.0191 enriched),**  
-**to get 4.9285714 mg of 0.1809 enriched substrate – for a 50-g soil
+**to get 4.9285714 mg of 0.1809 enriched substrate – for a 30-g soil
 core.**
 
 -----
@@ -236,13 +236,13 @@ where 24 g C corresponds to 90 g substrate.
 
 **so, we will mix 1.94 mg of 0.99 enriched substrate with 9.31 mg of
 unlabelled substrate (0.0121 enriched),**  
-**to get 11.25 mg of 0.1809 enriched substrate – for a 50-g soil core.**
+**to get 11.25 mg of 0.1809 enriched substrate – for a 30-g soil core.**
 
 -----
 
 **Session Info:**
 
-last run: 2020-07-29
+last run: 2020-07-31
 
 ``` r
 sessionInfo()
