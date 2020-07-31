@@ -61,7 +61,7 @@ for 10 cores,
 
 
 ### adsorbing OA onto goethite
-total clay needed = `r 5 * 8` g  
+total clay needed = `r 5 * 10` g  
 
 1. add 10 g clay + 30 mL OA solution to each 50-mL omics-safe tube (5 tubes total)
 1. shake overnight at 250 rpm at room temperature
@@ -92,9 +92,9 @@ total clay needed = `r 5 * 8` g
 ### procedure
 **set A: wetting** (n=3)  
 
-1. weigh 50 g ODE soil into pint-size Mason jars
+1. weigh 30 g ODE (35 g FM) soil into pint-size Mason jars
 1. place the oxalic acid-goethite packet in the top 1 cm of the soil.
-2. add 50 mL Milli-Q water from above
+2. add 25 mL Milli-Q water from above
 3. seal the jars for 48 hours at room temperature
 4. at the end of the incubation, pull 50 mL headspace and transfer to pre-evacuated bottles
     - ship gas samples to MSL
@@ -112,6 +112,8 @@ total clay needed = `r 5 * 8` g
     - freeze-dry
     - grind
     - analyze on Minerva
+1. repeat the same steps with control samples (soil without clay/OA)
+
 
 **set B: drying** (n=3)  
 

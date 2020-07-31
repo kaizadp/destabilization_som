@@ -59,7 +59,7 @@ to get 112.5 mg of enriched substrate.
 
 ### adsorbing OA onto goethite
 
-total clay needed = 40 g
+total clay needed = 50 g
 
 1.  add 10 g clay + 30 mL OA solution to each 50-mL omics-safe tube (5
     tubes total)
@@ -95,9 +95,9 @@ total clay needed = 40 g
 
 **set A: wetting** (n=3)
 
-1.  weigh 50 g ODE soil into pint-size Mason jars
+1.  weigh 30 g ODE (35 g FM) soil into pint-size Mason jars
 2.  place the oxalic acid-goethite packet in the top 1 cm of the soil.
-3.  add 50 mL Milli-Q water from above
+3.  add 25 mL Milli-Q water from above
 4.  seal the jars for 48 hours at room temperature
 5.  at the end of the incubation, pull 50 mL headspace and transfer to
     pre-evacuated bottles
@@ -116,6 +116,7 @@ total clay needed = 40 g
       - freeze-dry
       - grind
       - analyze on Minerva
+10. repeat the same steps with control samples (soil without clay/OA)
 
 **set B: drying** (n=3)
 
