@@ -59,22 +59,25 @@ for 10 cores,
  - mix  `r 1.94 * 10` mg of labelled substrate with `r 9.31 *10` mg unlabelled substrate to get `r 11.25 * 10` mg of enriched substrate.  
  - dissolve in 150 mL deionized mQ water
 
+  *112.780 mg unlabelled + 20.199 mg labelled OA weighed and dissolved in 150 mL water*
 
 ### adsorbing OA onto goethite
 total clay needed = `r 5 * 10` g  
 
-1. add 10 g clay + 30 mL OA solution to each 50-mL omics-safe tube (5 tubes total)
-1. shake overnight at 250 rpm at room temperature
+  ~~add 10 g clay + 30 mL OA solution to each 50-mL omics-safe tube (5 tubes total)~~  
+
+1. add 5 g clay + 15 mL OA solution (+ 5 mL water) to each 50-mL omics-safe tube (4 tubes total)  
+1. shake overnight at 200 rpm at room temperature
 1. centrifuge for 20 minutes at 2000g
-1. decant supernatant
-1. add 30 mL water (#1)
-1. shake on vortexer for 20 minutes
+1. decant and collect supernatant ("shake")
+1. add 20 mL water (#1)
+1. shake on vortexer for 10 minutes
 1. centrifuge for 20 minutes at 2000g
-1. decant supernatant
-1. add 30 mL water (#2)
-1. shake on vortexer for 20 minutes
+1. decant and collect supernatant ("rinse1")
+1. add 20 mL water (#2)
+1. shake on vortexer for 10 minutes
 1. centrifuge for 20 minutes at 2000g
-1. decant supernatant
+1. decant and collect supernatant ("rinse2")
 1. freeze-dry
 1. gently shake to break up large sheets of dried clay
 1. weigh 5 g of OA-clay into packets made of 100 um mesh.
@@ -115,7 +118,7 @@ total clay needed = `r 5 * 10` g
 1. repeat the same steps with control samples (soil without clay/OA)
 
 
-**set B: drying** (n=3)  
+~~**set B: drying** (n=3)~~  
 
 1. weigh 50 g ODE soil into pint-size Mason jars
 1. place the oxalic acid-goethite packet in the top 1 cm of the soil.

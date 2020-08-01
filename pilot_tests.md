@@ -57,23 +57,29 @@ for 10 cores,
 to get 112.5 mg of enriched substrate.  
 \- dissolve in 150 mL deionized mQ water
 
+*112.780 mg unlabelled + 20.199 mg labelled OA weighed and dissolved in
+150 mL water*
+
 ### adsorbing OA onto goethite
 
 total clay needed = 50 g
 
-1.  add 10 g clay + 30 mL OA solution to each 50-mL omics-safe tube (5
-    tubes total)
-2.  shake overnight at 250 rpm at room temperature
+~~add 10 g clay + 30 mL OA solution to each 50-mL omics-safe tube (5
+tubes total)~~
+
+1.  add 5 g clay + 15 mL OA solution (+ 5 mL water) to each 50-mL
+    omics-safe tube (4 tubes total)  
+2.  shake overnight at 200 rpm at room temperature
 3.  centrifuge for 20 minutes at 2000g
-4.  decant supernatant
-5.  add 30 mL water (\#1)
-6.  shake on vortexer for 20 minutes
+4.  decant and collect supernatant (“shake”)
+5.  add 20 mL water (\#1)
+6.  shake on vortexer for 10 minutes
 7.  centrifuge for 20 minutes at 2000g
-8.  decant supernatant
-9.  add 30 mL water (\#2)
-10. shake on vortexer for 20 minutes
+8.  decant and collect supernatant (“rinse1”)
+9.  add 20 mL water (\#2)
+10. shake on vortexer for 10 minutes
 11. centrifuge for 20 minutes at 2000g
-12. decant supernatant
+12. decant and collect supernatant (“rinse2”)
 13. freeze-dry
 14. gently shake to break up large sheets of dried clay
 15. weigh 5 g of OA-clay into packets made of 100 um mesh.
@@ -118,7 +124,7 @@ total clay needed = 50 g
       - analyze on Minerva
 10. repeat the same steps with control samples (soil without clay/OA)
 
-**set B: drying** (n=3)
+~~**set B: drying** (n=3)~~
 
 1.  weigh 50 g ODE soil into pint-size Mason jars
 2.  place the oxalic acid-goethite packet in the top 1 cm of the soil.
@@ -138,7 +144,7 @@ total clay needed = 50 g
 
 <summary>Session Info</summary>
 
-Date: 2020-07-31
+Date: 2020-08-01
 
     ## R version 4.0.2 (2020-06-22)
     ## Platform: x86_64-apple-darwin17.0 (64-bit)
