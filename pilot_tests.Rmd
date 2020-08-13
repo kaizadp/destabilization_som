@@ -95,7 +95,7 @@ total clay needed = `r 5 * 10` g
 ### procedure
 **set A: wetting** (n=3)  
 
-1. weigh 30 g ODE (35 g FM) soil into pint-size Mason jars
+1. weigh ~~30~~ 50 g ODE (~~35~~ ~58 g FM) soil into pint-size Mason jars
 1. place the oxalic acid-goethite packet in the top 1 cm of the soil.
 2. add 25 mL Milli-Q water from above
 3. seal the jars for 48 hours at room temperature
@@ -111,10 +111,23 @@ total clay needed = `r 5 * 10` g
     - weigh into aluminum tin
     - dry in oven at 105 C for 24 hours
 8. subsample for TC, 13C
-    - weigh into 15 mL omics-safe tube
+    - weigh ~5 g into 15 mL omics-safe tube
     - freeze-dry
-    - grind
+    - grind in mortar-pestle
     - analyze on Minerva
+1. subsample for WEOC
+    - weigh 2.5 g ODE (4.5 g) soil into a 50-mL omics-safe tube
+    - add 25 mL milli-Q water
+    - shake at 200 rpm for 30 minutes
+    - centrifuge at 2000g for 20 minutes
+    - filter through 0.4 um PES filters
+    - freeze-dry
+    - reconstitute with 0.2 uL milli-Q water
+    - transfer to 0.3 ul capsules
+    - allow to evaporate completely
+    - run on IRMS
+    
+    
 1. repeat the same steps with control samples (soil without clay/OA)
 
 
@@ -132,12 +145,21 @@ total clay needed = `r 5 * 10` g
 
 ```{r}
 expt_details = tribble(
-  ~ sample, ~ empty_wt_g, ~fm_soil_added_g,
-  1, NA, NA,
-  2, NA, NA,
-  3, NA, NA
-)
+  ~ sample, ~ empty_wt_g, ~fm_soil_added_g, ~clay_added_g, ~clay_type, ~water_added_mL, ~post_incub_wt_g,
+  1, 283.0, 58.2, 4.9, "packet", 35, 381.4,
+  2, 282.9, 58.5, 4.9, "packet", 35, 381.9,
+  3, 283.5, 58.7, 4.9, "mixed", 35, 382.3,
+  4, 284.3, 58.0, 4.9, "mixed", 35, 382.5,
+  5, 284.3, 58.3, 0.0, NA,      35, 378.0,
+  6, 293.9, 58.9, 0.0, NA,      35, 378.2
+) %>%
+  mutate(ODE_g = 50+clay_added_g,
+         water_content_g = post_incub_wt_g - (empty_wt_g + ODE_g),
+         moisture_perc = round((water_content_g/ODE_g)*100,2))
 ```
+
+The clay-amended soils were at ~80% gravimetric moisture.  
+Therefore, 2.5 g ODE = 4.5 g wet soil
 
 
 </details>

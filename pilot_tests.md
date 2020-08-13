@@ -101,7 +101,8 @@ tubes total)~~
 
 **set A: wetting** (n=3)
 
-1.  weigh 30 g ODE (35 g FM) soil into pint-size Mason jars
+1.  weigh ~~30~~ 50 g ODE (~~35~~ \~58 g FM) soil into pint-size Mason
+    jars
 2.  place the oxalic acid-goethite packet in the top 1 cm of the soil.
 3.  add 25 mL Milli-Q water from above
 4.  seal the jars for 48 hours at room temperature
@@ -118,11 +119,22 @@ tubes total)~~
       - weigh into aluminum tin
       - dry in oven at 105 C for 24 hours
 9.  subsample for TC, 13C
-      - weigh into 15 mL omics-safe tube
+      - weigh \~5 g into 15 mL omics-safe tube
       - freeze-dry
-      - grind
+      - grind in mortar-pestle
       - analyze on Minerva
-10. repeat the same steps with control samples (soil without clay/OA)
+10. subsample for WEOC
+      - weigh 2.5 g ODE (4.5 g) soil into a 50-mL omics-safe tube
+      - add 25 mL milli-Q water
+      - shake at 200 rpm for 30 minutes
+      - centrifuge at 2000g for 20 minutes
+      - filter through 0.4 um PES filters
+      - freeze-dry
+      - reconstitute with 0.2 uL milli-Q water
+      - transfer to 0.3 ul capsules
+      - allow to evaporate completely
+      - run on IRMS
+11. repeat the same steps with control samples (soil without clay/OA)
 
 ~~**set B: drying** (n=3)~~
 
@@ -134,6 +146,9 @@ tubes total)~~
 
 ### experimental details
 
+The clay-amended soils were at \~80% gravimetric moisture.  
+Therefore, 2.5 g ODE = 4.5 g wet soil
+
 </details>
 
 # Results
@@ -144,7 +159,7 @@ tubes total)~~
 
 <summary>Session Info</summary>
 
-Date: 2020-08-01
+Date: 2020-08-07
 
     ## R version 4.0.2 (2020-06-22)
     ## Platform: x86_64-apple-darwin17.0 (64-bit)
@@ -161,8 +176,8 @@ Date: 2020-08-01
     ## [1] stats     graphics  grDevices utils     datasets  methods   base     
     ## 
     ## other attached packages:
-    ## [1] forcats_0.5.0   stringr_1.4.0   dplyr_1.0.0     purrr_0.3.4    
-    ## [5] readr_1.3.1     tidyr_1.1.0     tibble_3.0.3    ggplot2_3.3.2  
+    ## [1] forcats_0.5.0   stringr_1.4.0   dplyr_1.0.1     purrr_0.3.4    
+    ## [5] readr_1.3.1     tidyr_1.1.1     tibble_3.0.3    ggplot2_3.3.2  
     ## [9] tidyverse_1.3.0
     ## 
     ## loaded via a namespace (and not attached):
@@ -171,12 +186,12 @@ Date: 2020-08-01
     ##  [9] jsonlite_1.7.0   evaluate_0.14    lifecycle_0.2.0  gtable_0.3.0    
     ## [13] pkgconfig_2.0.3  rlang_0.4.7      reprex_0.3.0     cli_2.0.2       
     ## [17] rstudioapi_0.11  DBI_1.1.0        yaml_2.2.1       haven_2.3.1     
-    ## [21] xfun_0.15        withr_2.2.0      xml2_1.3.2       httr_1.4.2      
-    ## [25] knitr_1.29       fs_1.4.2         hms_0.5.3        generics_0.0.2  
+    ## [21] xfun_0.16        withr_2.2.0      xml2_1.3.2       httr_1.4.2      
+    ## [25] knitr_1.29       fs_1.5.0         hms_0.5.3        generics_0.0.2  
     ## [29] vctrs_0.3.2      grid_4.0.2       tidyselect_1.1.0 glue_1.4.1      
     ## [33] R6_2.4.1         fansi_0.4.1      readxl_1.3.1     rmarkdown_2.3   
     ## [37] modelr_0.1.8     blob_1.2.1       magrittr_1.5     backports_1.1.8 
-    ## [41] scales_1.1.1     ellipsis_0.3.1   htmltools_0.5.0  rvest_0.3.5     
+    ## [41] scales_1.1.1     ellipsis_0.3.1   htmltools_0.5.0  rvest_0.3.6     
     ## [45] assertthat_0.2.1 colorspace_1.4-1 stringi_1.4.6    munsell_0.5.0   
     ## [49] broom_0.7.0      crayon_1.3.4
 
