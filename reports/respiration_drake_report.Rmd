@@ -1,0 +1,24 @@
+---
+title: "respiration"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE,
+                      collapse = TRUE,
+                      warning = FALSE,
+                      message = FALSE,
+                      comment = "#>",
+                      fig.path = ("markdown/respiration/"))
+
+library(drake)
+```
+
+```{r}
+readd(gg_13c)
+```
+
+```{r}
+readd(gg_co2)
+```
+
