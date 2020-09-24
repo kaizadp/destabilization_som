@@ -21,3 +21,16 @@ core_weights_drydown = read_sheet("1PR-VvyKcZIYoH3VF8bBWmzkmAnPibf0Fyd_EVrEqvcc"
 # respiration -------------------------------------------------------------
 read_sheet("1GWK1c5ruKiZmJ6mjZzCk-gBw6dL0eJ1OxT0OKHBsVbo") %>% 
   write.csv("data/respiration.csv", row.names = F)
+
+read_sheet("1nMyKFQRYX5LSpMsl905GRJGjHawKd76E4i0wysXAGNo", sheet = "LGR_Output") %>% 
+  write.csv("data/respiration_lgr_output.csv", row.names = F)
+
+read_sheet("1nMyKFQRYX5LSpMsl905GRJGjHawKd76E4i0wysXAGNo", sheet = "LICOR_Output") %>% 
+  write.csv("data/respiration_licor_output.csv", row.names = F)
+
+read_sheet("1GJiQ4wKdTOYJ5hDUhkhosYP_ZyRziFSa5gwkvUetFoM") %>% 
+  as.data.frame(.) %>% 
+  dplyr::select(sample, headspace_vol_mL) %>% 
+  rename(core = sample) %>% 
+  mutate(core = as.character(core)) %>% 
+  write.csv("data/respiration_headspace.csv", row.names = F)
