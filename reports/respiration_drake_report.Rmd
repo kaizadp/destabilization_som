@@ -1,7 +1,15 @@
 ---
-title: "respiration"
-output: html_document
+title: "DOM destabilization: respiration"
 ---
+
+two treatments:
+
+1. desorption: 13C oxalic acid adsorbed to goethite, 5 g goethite+OA added to soil
+2. priming: 13C oxalic acid added to soil as solution, 5 g goethite (without substrate) added to soil
+3. control: 5 g goethite added to soil, but no OA, only water
+
+Jars were sealed for 48 hours, after which headspace samples were collected and analyzed for CO2 concentration and 13C/12C composition of CO2. 
+
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = FALSE,
@@ -14,11 +22,40 @@ knitr::opts_chunk$set(echo = FALSE,
 library(drake)
 ```
 
-```{r}
-readd(gg_13c)
+---
+
+```{r resp_plots, fig.height=4, fig.width=6}
+readd(gg_respiration)$gg_resp
+readd(gg_respiration)$gg_D13C
+readd(gg_respiration)$gg_R13C
+readd(gg_respiration)$gg_13C_umol
 ```
 
-```{r}
-readd(gg_co2)
+---
+
+### priming
+
+How much priming was seen in the treatments?
+
+Priming calculated as: *(CO2C_umol - 13CO2C_umol) - control_CO2C_umol*
+
+[from Bastida et al. Nat. Comms.](https://doi.org/10.1038/s41467-019-11472-7) 
+
+
+```{r priming}
+readd(priming_table)
 ```
 
+
+---
+
+<details>
+  <summary>Session Info</summary>
+
+Date Run: `r Sys.Date()`
+
+```{r}
+sessionInfo()
+```
+
+</details>
