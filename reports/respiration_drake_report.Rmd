@@ -24,7 +24,7 @@ library(drake)
 
 ---
 
-```{r resp_plots, fig.height=4, fig.width=6}
+```{r resp_plots, fig.height=5, fig.width=6}
 readd(gg_respiration)$gg_resp
 readd(gg_respiration)$gg_D13C
 readd(gg_respiration)$gg_R13C

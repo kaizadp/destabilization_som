@@ -112,24 +112,51 @@ make_priming_table = function(combined_lgr_licor){
 
 
 # respiration functions -- plotting ---------------------------------------
+theme_kp <- function() {  # this for all the elements common across plots
+  theme_bw() %+replace%
+    theme(legend.position = "top",
+          legend.key=element_blank(),
+          legend.title = element_blank(),
+          legend.text = element_text(size = 12),
+          legend.key.size = unit(1.5, 'lines'),
+          panel.border = element_rect(color="black",size=1.5, fill = NA),
+          
+          plot.title = element_text(hjust = 0.05, size = 14),
+          axis.text = element_text(size = 10, color = "black"),
+          axis.title = element_text(size = 12, face = "bold", color = "black"),
+          
+          # formatting for facets
+          panel.background = element_blank(),
+          strip.background = element_rect(colour="white", fill="white"), #facet formatting
+          panel.spacing.x = unit(1.5, "lines"), #facet spacing for x axis
+          panel.spacing.y = unit(1.5, "lines"), #facet spacing for x axis
+          strip.text.x = element_text(size=12, face="bold"), #facet labels
+          strip.text.y = element_text(size=12, face="bold", angle = 270) #facet labels
+    )
+}
 
 plot_respiration = function(respiration){
   gg_resp = 
     respiration %>% 
     ggplot(aes(x = treatment, y = pCO2_ppm, color = type))+
     geom_boxplot()+
-    geom_point(size=3, position = position_dodge(width = 0.7))+
+    geom_point(size=3, position = position_dodge(width = 0.75))+
     scale_color_manual(values = pnw_palette("Sailboat", 3))+
     labs(title = "partial pressure of CO2",
+         y = "pCO2, ppm", 
          caption = "blank-corrected with ambient")+
+    theme_kp()+
     NULL
   
   gg_D13C = 
     respiration %>% 
     ggplot(aes(x = treatment, y = D13C_calc, color = type))+
-    geom_point(size=3, position = position_dodge(width = 0.5))+
+    geom_boxplot()+
+    geom_point(size=3, position = position_dodge(width = 0.75))+
     scale_color_manual(values = pnw_palette("Sailboat", 3))+
-    labs(title = "Δ13C-CO2")+
+    labs(title = "Δ13C-CO2",
+         y = "Δ13C, ‰")+
+    theme_kp()+
     NULL
   
   gg_R13C = 
@@ -138,6 +165,7 @@ plot_respiration = function(respiration){
     geom_point(size=3, position = position_dodge(width = 0.5))+
     scale_color_manual(values = pnw_palette("Sailboat", 3))+
     labs(title = "R C13/C12 in CO2")+
+    theme_kp()+
     NULL 
   
   gg_13C_umol = 
@@ -146,6 +174,7 @@ plot_respiration = function(respiration){
     geom_point(size=3, position = position_dodge(width = 0.5))+
     scale_color_manual(values = pnw_palette("Sailboat", 3))+
     labs(title = "umol of 13C-CO2")+
+    theme_kp()+
     NULL
   
   list(gg_resp = gg_resp,
