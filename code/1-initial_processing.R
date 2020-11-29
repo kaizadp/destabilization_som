@@ -34,3 +34,11 @@ read_sheet("1GJiQ4wKdTOYJ5hDUhkhosYP_ZyRziFSa5gwkvUetFoM") %>%
   rename(core = sample) %>% 
   mutate(core = as.character(core)) %>% 
   write.csv("data/respiration_headspace.csv", row.names = F)
+
+
+# irms --------------------------------------------------------------------
+read_sheet("1sDUxJV7E5Hrz7p7_xF7QAKj9KzLBl06n_k6bUHRkdJA", sheet = "report") %>% 
+  write.csv("data/irms_soil_report.csv", row.names = F, na = "")
+read_sheet("1sDUxJV7E5Hrz7p7_xF7QAKj9KzLBl06n_k6bUHRkdJA", sheet = "tray_key") %>% 
+  write.csv("data/irms_soil_traykey.csv", row.names = F, na = "")
+
