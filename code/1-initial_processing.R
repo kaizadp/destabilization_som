@@ -37,8 +37,16 @@ read_sheet("1GJiQ4wKdTOYJ5hDUhkhosYP_ZyRziFSa5gwkvUetFoM") %>%
 
 
 # irms --------------------------------------------------------------------
+## irms soil
 read_sheet("1sDUxJV7E5Hrz7p7_xF7QAKj9KzLBl06n_k6bUHRkdJA", sheet = "report") %>% 
   write.csv("data/irms_soil_report.csv", row.names = F, na = "")
 read_sheet("1sDUxJV7E5Hrz7p7_xF7QAKj9KzLBl06n_k6bUHRkdJA", sheet = "tray_key") %>% 
   write.csv("data/irms_soil_traykey.csv", row.names = F, na = "")
 
+## irms weoc
+read_sheet("1W0Gum8I-HTUu61l9_cK2RtttBCq05O1PHFDkMOt6pRE", sheet = "report") %>% 
+  mutate(d15N_air = as.numeric(paste0(d15N_air)),
+         d13C_VPDB = as.numeric(paste0(d13C_VPDB))) %>% 
+  write.csv("data/irms_weoc_report.csv", row.names = F, na = "")
+read_sheet("1W0Gum8I-HTUu61l9_cK2RtttBCq05O1PHFDkMOt6pRE", sheet = "tray_key") %>% 
+  write.csv("data/irms_weoc_traykey.csv", row.names = F, na = "")
