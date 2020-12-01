@@ -1,20 +1,32 @@
+# SOM DESTABILIZATION
+# KAIZAD F. PATEL
+# Aug 31, 2020
+
+#################### #
+#################### #
+
+# 1-initial_processing
+
+## This script will import the necessary files from Google Drive and save them in the local directory.
+## You do not need to run this file each time. Run only once, or to import new/updated files.
+
+#################### #
+#################### #
+
 # install.packages("devtools")
 # devtools::install_github("tidyverse/googlesheets4")
 
+source("code/0-packages.R")
 library(googlesheets4)
 
-
 # load files from googlesheets -----------------------------------------
-core_key = read_sheet("1k7-Xdav-tRB13cyf3As_MOUk339u3XUuUrPmRwOg7AU") %>% 
-  write.csv("data/core_key.csv", row.names = F)
+core_key = read_sheet("1k7-Xdav-tRB13cyf3As_MOUk339u3XUuUrPmRwOg7AU") %>% write.csv(COREKEY, row.names = F)
 
 core_weights = read_sheet("1PR-VvyKcZIYoH3VF8bBWmzkmAnPibf0Fyd_EVrEqvcc")
 
-
 # drying/drying-rewetting soils are drying
 # the `drydown` file tracks the weight to see how much water was lost  
-core_weights_drydown = read_sheet("1PR-VvyKcZIYoH3VF8bBWmzkmAnPibf0Fyd_EVrEqvcc",
-                                  sheet = "drydown")
+core_weights_drydown = read_sheet("1PR-VvyKcZIYoH3VF8bBWmzkmAnPibf0Fyd_EVrEqvcc", sheet = "drydown")
 
 
 
@@ -36,17 +48,34 @@ read_sheet("1GJiQ4wKdTOYJ5hDUhkhosYP_ZyRziFSa5gwkvUetFoM") %>%
   write.csv("data/respiration_headspace.csv", row.names = F)
 
 
-# irms --------------------------------------------------------------------
+# IRMS AND TOTAL C FILES --------------------------------------------------------------------
 ## irms soil
 read_sheet("1sDUxJV7E5Hrz7p7_xF7QAKj9KzLBl06n_k6bUHRkdJA", sheet = "report") %>% 
-  write.csv("data/irms_soil_report.csv", row.names = F, na = "")
+  write.csv(IRMS_SOIL_REPORT, row.names = F, na = "")
+
 read_sheet("1sDUxJV7E5Hrz7p7_xF7QAKj9KzLBl06n_k6bUHRkdJA", sheet = "tray_key") %>% 
-  write.csv("data/irms_soil_traykey.csv", row.names = F, na = "")
+  write.csv(IRMS_SOIL_TRAYKEY, row.names = F, na = "")
 
 ## irms weoc
 read_sheet("1W0Gum8I-HTUu61l9_cK2RtttBCq05O1PHFDkMOt6pRE", sheet = "report") %>% 
   mutate(d15N_air = as.numeric(paste0(d15N_air)),
          d13C_VPDB = as.numeric(paste0(d13C_VPDB))) %>% 
-  write.csv("data/irms_weoc_report.csv", row.names = F, na = "")
+  write.csv(IRMS_WEOC_REPORT, row.names = F, na = "")
+
 read_sheet("1W0Gum8I-HTUu61l9_cK2RtttBCq05O1PHFDkMOt6pRE", sheet = "tray_key") %>% 
-  write.csv("data/irms_weoc_traykey.csv", row.names = F, na = "")
+  write.csv(IRMS_WEOC_TRAYKEY, row.names = F, na = "")
+
+## tc reports
+read_sheet("1u_WAd8dEymTWItSqIRxYw0QI-5z7m9AfK86FvNSgTrQ", sheet = "report") %>% 
+  write.csv(TC_WEOC_REPORT, row.names = F, na = "")
+
+
+
+## weoc weights
+weoc_subsampling = read_sheet("1A8CXukZSxYb3Hpc-XEea2RPvabO2hzvBSimyQT0gu1w", sheet = "Sheet1") %>% 
+  mutate(core = as.numeric(as.character(core))) %>% 
+  write.csv(WEOC_SUBSAMPLING, row.names = F, na = "")
+
+weoc_capsuleweights = read_sheet("1pTg_Q2_jsQoYxmXZbUqDxTv4VTENCBemcsMeGDovkAs", sheet = "all_weights") %>% 
+  mutate(core = as.numeric(as.character(core))) %>% 
+  write.csv(WEOC_CAPSULES, row.names = F, na = "")
