@@ -23,6 +23,7 @@ soilc_plan =
     # 2. WEOC -----------------------------------------------------------------
     ## a. process
     weoc_combined = process_weoc_files(irms_weoc_report, tc_weoc_report, weoc_traykey)$weoc_combined,
+    weoc_calibration = do_calibration(tc_weoc_report),
     
     ## b. plot
     gg_weoc = plot_weoc(weoc_combined, core_key),
@@ -39,7 +40,8 @@ soilc_plan =
     # 3. SOIL -----------------------------------------------------------------
     ## a. process
     soil_combined = process_soil_files(irms_soil_report, tc_soil_report, soil_traykey)$soil_combined,
-
+    soil_calibration = do_calibration(tc_soil_report),
+    
     ## b. plot
     gg_soil = plot_soilc(soil_combined, core_key),
     

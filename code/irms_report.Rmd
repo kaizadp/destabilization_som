@@ -30,6 +30,16 @@ readd(gg_soil)
 
 ---
 
+## Albus (Total C) calibration
+
+```{r calib_plots}
+readd(weoc_calibration)$calib_plot + labs(title = "WEOC calibration")
+readd(soil_calibration)$calib_plot+ labs(title = "Soil C calibration")
+```
+
+
+---
+
 Date run: `Sys.Date()`
 
 ```{r}
