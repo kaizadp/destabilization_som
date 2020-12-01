@@ -7,31 +7,35 @@ IRMS results
 
     #> $gg_weoc_d13C
 
-![](/Users/pate212/GitHub/destabilization_som/reports/markdown-figs/irms/WEOC_figs-1.png)<!-- -->
+![](/Users/pate212/GitHub/destabilization_som/reports/irms_report_files/figure-gfm/WEOC_figs-1.png)<!-- -->
 
     #> 
     #> $gg_weoc_tc
 
-![](/Users/pate212/GitHub/destabilization_som/reports/markdown-figs/irms/WEOC_figs-2.png)<!-- -->
+![](/Users/pate212/GitHub/destabilization_som/reports/irms_report_files/figure-gfm/WEOC_figs-2.png)<!-- -->
 
 ## Soil total carbon
 
     #> $gg_soil_d13C
 
-![](/Users/pate212/GitHub/destabilization_som/reports/markdown-figs/irms/soil_figs-1.png)<!-- -->
+![](/Users/pate212/GitHub/destabilization_som/reports/irms_report_files/figure-gfm/soil_figs-1.png)<!-- -->
 
     #> 
     #> $gg_soil_tc
 
-![](/Users/pate212/GitHub/destabilization_som/reports/markdown-figs/irms/soil_figs-2.png)<!-- -->
+![](/Users/pate212/GitHub/destabilization_som/reports/irms_report_files/figure-gfm/soil_figs-2.png)<!-- -->
 
 -----
 
 ## Albus (Total C) calibration
 
-![](/Users/pate212/GitHub/destabilization_som/reports/markdown-figs/irms/calib_plots-1.png)<!-- -->![](/Users/pate212/GitHub/destabilization_som/reports/markdown-figs/irms/calib_plots-2.png)<!-- -->
+![](/Users/pate212/GitHub/destabilization_som/reports/irms_report_files/figure-gfm/calib_plots-1.png)<!-- -->![](/Users/pate212/GitHub/destabilization_som/reports/irms_report_files/figure-gfm/calib_plots-2.png)<!-- -->
 
 -----
+
+<details>
+
+<summary>Session Info</summary>
 
 Date run: `Sys.Date()`
 
@@ -62,5 +66,7 @@ Date run: `Sys.Date()`
     #> [36] tidyselect_1.1.0  fansi_0.4.1       crayon_1.3.4      dbplyr_1.4.4      withr_2.2.0       grid_4.0.2        nlme_3.1-148     
     #> [43] jsonlite_1.7.0    gtable_0.3.0      lifecycle_0.2.0   DBI_1.1.0         magrittr_1.5      storr_1.2.1       scales_1.1.1     
     #> [50] cli_2.0.2         stringi_1.4.6     farver_2.0.3      fs_1.5.0          xml2_1.3.2        ellipsis_0.3.1    filelock_1.0.2   
-    #> [57] generics_0.0.2    vctrs_0.3.2       tools_4.0.2       glue_1.4.1        hms_0.5.3         parallel_4.0.2    yaml_2.2.1       
-    #> [64] colorspace_1.4-1  base64url_1.4     rvest_0.3.6       knitr_1.29        haven_2.3.1
+    #> [57] generics_0.0.2    vctrs_0.3.2       tools_4.0.2       glue_1.4.1        hms_0.5.3         rsconnect_0.8.16  parallel_4.0.2   
+    #> [64] yaml_2.2.1        colorspace_1.4-1  base64url_1.4     rvest_0.3.6       knitr_1.29        haven_2.3.1
+
+</details>

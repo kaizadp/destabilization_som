@@ -7,11 +7,15 @@ knitr::opts_chunk$set(echo = FALSE,
                       collapse = TRUE,
                       warning = FALSE,
                       message = FALSE,
-                      comment = "#>",
-                      fig.path = here::here(("reports/markdown-figs/irms/")))
+                      comment = "#>"
+                      #fig.path = "reports/markdown-figs/irms/"
+                      )
 
 library(drake)
 ```
+
+
+
 
 ---
 
@@ -40,9 +44,13 @@ readd(soil_calibration)$calib_plot+ labs(title = "Soil C calibration")
 
 ---
 
+<details>   
+   <summary>Session Info</summary>
+   
 Date run: `Sys.Date()`
 
 ```{r}
 sessionInfo()
 ```
 
+</details>   
