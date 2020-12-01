@@ -13,10 +13,12 @@ knitr::opts_chunk$set(echo = FALSE,
 library(drake)
 ```
 
+---
+
 ## Water extractable organic carbon (WEOC)
 
 ```{r WEOC_figs, eval=T}
-readd(gg_weoc)
+readd(gg_weoc) 
 ```
 
 ## Soil total carbon 
