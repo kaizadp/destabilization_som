@@ -30,7 +30,9 @@ do_calibration = function(dat){
     calib %>% 
     ggplot(aes(x = C_area, y = C_mg))+
     geom_point()+
-    geom_smooth(method = "lm", se = F)
+    geom_smooth(method = "lm", se = F)+
+    theme_kp()+
+    NULL
   
   
   list(slope = calib_coeff %>% pull(slope),
