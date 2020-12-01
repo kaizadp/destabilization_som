@@ -11,7 +11,6 @@
 
 #################### #
 #################### #
-C_VPDB = 0.011237
 
 # PROCESSING FUNCTIONS -------------------------------------------------------------------------
 do_calibration = function(dat){
@@ -39,9 +38,11 @@ do_calibration = function(dat){
        calib_plot = calib_plot)
 }
 
-process_weoc_files = function(irms_weoc_report, tc_weoc_report){
+process_weoc_files = function(irms_weoc_report, tc_weoc_report, weoc_traykey){
   
   # 1. IRMS --------------------------------------------------------------------
+  C_VPDB = 0.011237
+  
   ## a. clean and get d13C, R13/12C values for all reps
   irms_weoc_allreps = 
     irms_weoc_report %>% 
@@ -114,6 +115,8 @@ process_weoc_files = function(irms_weoc_report, tc_weoc_report){
   ## now bring in weights data for proper unit conversion
   ## 3.5 g --> 35 mL extract
   ## 2 mL extract --> weight mg
+  weoc_subsampling = readd(weoc_subsampling)
+  weoc_capsuleweights = readd(weoc_capsuleweights)
   
   weoc_subsampling2 = 
     weoc_subsampling %>% 
@@ -181,4 +184,167 @@ process_weoc_files = function(irms_weoc_report, tc_weoc_report){
        tc_weoc_wide = tc_weoc_wide,
        weoc_combined = weoc_combined
   )
+}
+
+process_soil_files = function(irms_soil_report, tc_soil_report, soil_traykey){
+  
+  # 1. IRMS --------------------------------------------------------------------
+  C_VPDB = 0.011237
+  
+  ## a. clean and get d13C, R13/12C values for all reps
+  vec <- rep(c("a", "b", "c"), 45)
+  irms_soil_allreps = 
+    irms_soil_report %>% 
+    dplyr::select(name, sample_group, d13C_VPDB) %>% 
+    filter(sample_group == "sample") %>% 
+    left_join(soil_traykey, by = "name") %>% 
+    filter(!is.na(core)) %>% 
+    mutate(
+      rep = vec,
+      R13C = ((d13C_VPDB/1000) + 1) * C_VPDB,
+      R13C = round(R13C, 6)) %>% 
+    dplyr::select(core, rep, d13C_VPDB, R13C)
+  
+  ## b. make wide form with measures of variance
+  irms_soil_cv = 
+    irms_soil_allreps %>% 
+    dplyr::select(core, rep, d13C_VPDB) %>% 
+    group_by(core) %>% 
+    dplyr::summarise(sd = round(sd(d13C_VPDB), 2),
+                     cv = round(sd/mean(d13C_VPDB), 2),
+                     cv = abs(cv))
+  
+  irms_soil_wide = 
+    irms_soil_allreps %>% 
+    dplyr::select(core, rep, d13C_VPDB) %>% 
+    pivot_wider(names_from = "rep", values_from = "d13C_VPDB") %>% 
+    left_join(irms_soil_cv, by = "core") %>% 
+    rename(d13C_A = a,
+           d13C_B = b,
+           d13C_C = c) %>% 
+    arrange(core)
+  
+  #  irms_weoc_outliers = 
+  #    irms_weoc %>% 
+  #    dplyr::select(core, weoc_rep, d13C_VPDB) %>% 
+  #    group_by(core) %>% 
+  #    dplyr::mutate(sd = round(sd(d13C_VPDB), 2),
+  #                  cv = round(sd/mean(d13C_VPDB), 2),
+  #                  cv = abs(cv),
+  #                  mean = mean(d13C_VPDB),
+  #                  out = d13C_VPDB-mean,
+  #                  outlier = (d13C_VPDB-mean) > (3*sd))
+  #  
+  
+  ## c. get soil summary (don't do???)
+  irms_soil_summary = 
+    irms_soil_allreps %>% 
+    ungroup() %>% 
+    group_by(core) %>% 
+    dplyr::summarize(d13C_VPDB = round(mean(d13C_VPDB), 2),
+                     R13C = round(mean(R13C), 6))
+  
+  #  
+  
+  
+  # 2. TC ----------------------------------------------------------------------
+  SLOPE_soil = do_calibration(tc_soil_report)$slope
+  INTERCEPT_soil = do_calibration(tc_soil_report)$intercept
+
+  ## a. clean data for all reps
+  tc_soil_allreps = 
+    tc_soil_report %>% 
+    #filter(is.na(Memo)) %>% 
+    dplyr::select(Name, weight_mg, C_area) %>% 
+    mutate(C_mg_calc = round(C_area*SLOPE_soil + INTERCEPT_soil, 3)) %>% 
+    left_join(soil_traykey, by = c("Name" = "name")) %>% 
+    filter(!is.na(core)) %>% 
+    mutate(rep = vec,
+           totalC_perc = round((C_mg_calc/weight_mg)*100, 2)) %>% 
+    #mutate(core = as.character(core)) %>% 
+    dplyr::select(core, rep, weight_mg, C_mg_calc, totalC_perc)
+  
+  ## b. make wide form with cv, sd
+  tc_soil_cv = 
+    tc_soil_allreps %>% 
+    dplyr::select(core, rep, totalC_perc) %>% 
+    group_by(core) %>% 
+    dplyr::summarise(sd = round(sd(totalC_perc), 2),
+                     cv = round(sd/mean(totalC_perc), 2))
+  
+  #
+  # 3. combined ----------------------------------------------------------------
+  soil_combined_allreps = 
+    left_join(tc_soil_allreps, irms_soil_allreps, by = c("core", "rep")) %>% 
+    mutate(C13_mg = R13C/(1+R13C))
+  
+  soil_combined = 
+    soil_combined_allreps %>% 
+    group_by(core) %>% 
+    dplyr::summarise(totalC_perc = round(mean(totalC_perc), 2),
+                     d13C_VPDB = round(mean(d13C_VPDB), 2),
+                     R13C = round(mean(R13C), 6)
+    )
+  
+  #  
+  # 4. outputs ----
+  list(irms_soil_wide = irms_soil_wide,
+       soil_combined = soil_combined
+  )
+}
+
+# PLOTTING FUNCTIONS ------------------------------------------------------
+
+plot_weoc = function(weoc_combined, core_key){
+  weoc = 
+    weoc_combined %>% 
+    left_join(core_key, by = "core")
+  
+  gg_weoc_d13C = 
+    weoc %>% 
+    ggplot(aes(x = treatment, y = d13C_VPDB, color = type))+
+    geom_point(size=3, position = position_dodge(width = 0.75))+
+    scale_color_manual(values = pnw_palette("Sailboat", 3))+
+    labs(title = "WEOC: δ13C",
+         y = "δ13C, ‰")+
+    theme_kp()
+  
+  gg_weoc_tc = 
+    weoc %>% 
+    ggplot(aes(x = treatment, y = weoc_mg_g, color = type))+
+    geom_point(size=3, position = position_dodge(width = 0.75))+
+    scale_color_manual(values = pnw_palette("Sailboat", 3))+
+    labs(title = "WEOC: C concentrations")+
+    expand_limits(y = 0)+
+    theme_kp()
+  
+  list(gg_weoc_d13C = gg_weoc_d13C,
+       gg_weoc_tc = gg_weoc_tc)
+  
+}
+plot_soilc = function(soil_combined, core_key){
+  soilc = 
+    soil_combined %>% 
+    left_join(core_key, by = "core")
+  
+  gg_soil_d13C = 
+    soilc %>% 
+    ggplot(aes(x = treatment, y = d13C_VPDB, color = type))+
+    geom_point(size=3, position = position_dodge(width = 0.75))+    
+    scale_color_manual(values = pnw_palette("Sailboat", 3))+
+    labs(title = "soil: δ13C",
+         y = "δ13C, ‰")+
+    theme_kp()
+  
+  gg_soil_tc = 
+    soilc %>% 
+    ggplot(aes(x = treatment, y = totalC_perc, color = type))+
+    geom_point(size=3, position = position_dodge(width = 0.75))+    
+    scale_color_manual(values = pnw_palette("Sailboat", 3))+
+    labs(title = "soil: C concentrations")+
+    #expand_limits(y = 0)+
+    theme_kp()
+  
+  list(gg_soil_d13C = gg_soil_d13C,
+       gg_soil_tc = gg_soil_tc)
 }
