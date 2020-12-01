@@ -7,15 +7,13 @@ knitr::opts_chunk$set(echo = FALSE,
                       collapse = TRUE,
                       warning = FALSE,
                       message = FALSE,
-                      comment = "#>" #, fig.path = "reports/markdown-figs/irms/" 
+                      comment = "#>",
+                      fig.path = ("markdown-figs/respiration/") 
                       )
 
 library(drake)
 ```
 
-
-
-a 
 
 ---
 
