@@ -46,10 +46,12 @@ soilc_plan =
     gg_soil = plot_soilc(soil_combined, core_key),
     
     # REPORT ------------------------------------------------------------------
-    report = rmarkdown::render(
-      knitr_in("code/irms_report.Rmd"),
-      output_format = rmarkdown::github_document(),
-      output_dir = "reports")
+#    report = rmarkdown::render(
+#      knitr_in("code/irms_report.Rmd"),
+#      output_format = rmarkdown::github_document(),
+#      output_dir = "reports"),
+
+report2 = ezknitr::ezknit(file = "code/irms_report.Rmd", out_dir = "reports", fig_dir = "irms_figs_new")
   )
 
 
