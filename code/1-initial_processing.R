@@ -69,6 +69,8 @@ read_sheet("1W0Gum8I-HTUu61l9_cK2RtttBCq05O1PHFDkMOt6pRE", sheet = "tray_key") %
 read_sheet("1u_WAd8dEymTWItSqIRxYw0QI-5z7m9AfK86FvNSgTrQ", sheet = "report") %>% 
   write.csv(TC_WEOC_REPORT, row.names = F, na = "")
 
+read_sheet("1z506tB8EaWuE98pAOwe5ZTpnXsnTfi6CnaEYz5yXnCQ", sheet = "report") %>% 
+  write.csv(TC_SOIL_REPORT, row.names = F, na = "")
 
 
 ## weoc weights
