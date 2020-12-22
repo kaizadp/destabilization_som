@@ -25,6 +25,9 @@ library(googlesheets4)
 core_key = read_sheet("1k7-Xdav-tRB13cyf3As_MOUk339u3XUuUrPmRwOg7AU") %>% write.csv(COREKEY, row.names = F)
 
 core_weights = read_sheet("1PR-VvyKcZIYoH3VF8bBWmzkmAnPibf0Fyd_EVrEqvcc")
+core_weights %>% 
+  mutate(headspace_cm3 = 496.5 - 68.5) %>% 
+  write.csv(COREWEIGHTS, row.names = F, na = "")
 
 # drying/drying-rewetting soils are drying
 # the `drydown` file tracks the weight to see how much water was lost  

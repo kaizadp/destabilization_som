@@ -6,6 +6,7 @@ library(PNWColors)
 
 # 2. SET FILE NAMES/PATHS -------------------------------------------------
 COREKEY = "data/core_key.csv"
+COREWEIGHTS = "data/core_weights.csv"
 
 ## IRMS & TOTAL C
 IRMS_SOIL_REPORT = "data/irms/irms_soil_report.csv"
