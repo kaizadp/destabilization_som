@@ -20,6 +20,8 @@ source("code/0-packages.R")
 library(googlesheets4)
 
 # load files from googlesheets -----------------------------------------
+
+## 1. core info ---------------------------------------------------------------
 core_key = read_sheet("1k7-Xdav-tRB13cyf3As_MOUk339u3XUuUrPmRwOg7AU") %>% write.csv(COREKEY, row.names = F)
 
 core_weights = read_sheet("1PR-VvyKcZIYoH3VF8bBWmzkmAnPibf0Fyd_EVrEqvcc")
@@ -30,7 +32,7 @@ core_weights_drydown = read_sheet("1PR-VvyKcZIYoH3VF8bBWmzkmAnPibf0Fyd_EVrEqvcc"
 
 
 
-# respiration -------------------------------------------------------------
+## 2. respiration -------------------------------------------------------------
 read_sheet("1GWK1c5ruKiZmJ6mjZzCk-gBw6dL0eJ1OxT0OKHBsVbo") %>% 
   write.csv("data/respiration.csv", row.names = F)
 
@@ -48,15 +50,15 @@ read_sheet("1GJiQ4wKdTOYJ5hDUhkhosYP_ZyRziFSa5gwkvUetFoM") %>%
   write.csv("data/respiration_headspace.csv", row.names = F)
 
 
-# IRMS AND TOTAL C FILES --------------------------------------------------------------------
-## irms soil
+## 3. IRMS AND TOTAL C FILES --------------------------------------------------------------------
+### irms soil
 read_sheet("1sDUxJV7E5Hrz7p7_xF7QAKj9KzLBl06n_k6bUHRkdJA", sheet = "report") %>% 
   write.csv(IRMS_SOIL_REPORT, row.names = F, na = "")
 
 read_sheet("1sDUxJV7E5Hrz7p7_xF7QAKj9KzLBl06n_k6bUHRkdJA", sheet = "tray_key") %>% 
   write.csv(IRMS_SOIL_TRAYKEY, row.names = F, na = "")
 
-## irms weoc
+### irms weoc
 read_sheet("1W0Gum8I-HTUu61l9_cK2RtttBCq05O1PHFDkMOt6pRE", sheet = "report") %>% 
   mutate(d15N_air = as.numeric(paste0(d15N_air)),
          d13C_VPDB = as.numeric(paste0(d13C_VPDB))) %>% 
@@ -65,7 +67,7 @@ read_sheet("1W0Gum8I-HTUu61l9_cK2RtttBCq05O1PHFDkMOt6pRE", sheet = "report") %>%
 read_sheet("1W0Gum8I-HTUu61l9_cK2RtttBCq05O1PHFDkMOt6pRE", sheet = "tray_key") %>% 
   write.csv(IRMS_WEOC_TRAYKEY, row.names = F, na = "")
 
-## tc reports
+### tc reports
 read_sheet("1u_WAd8dEymTWItSqIRxYw0QI-5z7m9AfK86FvNSgTrQ", sheet = "report") %>% 
   write.csv(TC_WEOC_REPORT, row.names = F, na = "")
 
@@ -73,7 +75,7 @@ read_sheet("1z506tB8EaWuE98pAOwe5ZTpnXsnTfi6CnaEYz5yXnCQ", sheet = "report") %>%
   write.csv(TC_SOIL_REPORT, row.names = F, na = "")
 
 
-## weoc weights
+### weoc weights
 weoc_subsampling = read_sheet("1A8CXukZSxYb3Hpc-XEea2RPvabO2hzvBSimyQT0gu1w", sheet = "Sheet1") %>% 
   mutate(core = as.numeric(as.character(core))) %>% 
   write.csv(WEOC_SUBSAMPLING, row.names = F, na = "")
