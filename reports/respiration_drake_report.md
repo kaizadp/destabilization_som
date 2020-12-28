@@ -15,7 +15,7 @@ CO2.
 
 -----
 
-![](markdown/respiration/resp_plots-1.png)<!-- -->![](markdown/respiration/resp_plots-2.png)<!-- -->![](markdown/respiration/resp_plots-3.png)<!-- -->![](markdown/respiration/resp_plots-4.png)<!-- -->
+![](markdown-figs/respiration/resp_plots-1.png)<!-- -->![](markdown-figs/respiration/resp_plots-2.png)<!-- -->![](markdown-figs/respiration/resp_plots-3.png)<!-- -->![](markdown-figs/respiration/resp_plots-4.png)<!-- -->
 
 -----
 
@@ -32,8 +32,8 @@ Comms.](https://doi.org/10.1038/s41467-019-11472-7)
 | treatment          | desorption\_umolC | priming\_umolC |
 | :----------------- | ----------------: | -------------: |
 | 1-time-zero        |           \-1.968 |        \-7.597 |
-| 2-wetting          |          \-12.481 |          1.029 |
-| 4-drying-rewetting |           \-6.167 |             NA |
+| 2-wetting          |          \-13.136 |          1.029 |
+| 4-drying-rewetting |           \-5.000 |             NA |
 
 -----
 
@@ -41,11 +41,11 @@ Comms.](https://doi.org/10.1038/s41467-019-11472-7)
 
 <summary>Session Info</summary>
 
-Date Run: 2020-09-30
+Date Run: 2020-12-28
 
     #> R version 4.0.2 (2020-06-22)
     #> Platform: x86_64-apple-darwin17.0 (64-bit)
-    #> Running under: macOS Catalina 10.15.6
+    #> Running under: macOS Catalina 10.15.7
     #> 
     #> Matrix products: default
     #> BLAS:   /System/Library/Frameworks/Accelerate.framework/Versions/A/Frameworks/vecLib.framework/Versions/A/libBLAS.dylib
@@ -55,29 +55,81 @@ Date Run: 2020-09-30
     #> [1] en_US.UTF-8/en_US.UTF-8/en_US.UTF-8/C/en_US.UTF-8/en_US.UTF-8
     #> 
     #> attached base packages:
-    #> [1] stats     graphics  grDevices utils     datasets  methods   base     
+    #> [1] stats     graphics  grDevices
+    #> [4] utils     datasets  methods  
+    #> [7] base     
     #> 
     #> other attached packages:
-    #>  [1] PNWColors_0.1.0 drake_7.12.4    forcats_0.5.0   stringr_1.4.0  
-    #>  [5] dplyr_1.0.1     purrr_0.3.4     readr_1.3.1     tidyr_1.1.1    
-    #>  [9] tibble_3.0.3    ggplot2_3.3.2   tidyverse_1.3.0
+    #>  [1] PNWColors_0.1.0 drake_7.12.4   
+    #>  [3] forcats_0.5.0   stringr_1.4.0  
+    #>  [5] dplyr_1.0.1     purrr_0.3.4    
+    #>  [7] readr_1.3.1     tidyr_1.1.1    
+    #>  [9] tibble_3.0.3    ggplot2_3.3.2  
+    #> [11] tidyverse_1.3.0
     #> 
     #> loaded via a namespace (and not attached):
-    #>  [1] Rcpp_1.0.5        lubridate_1.7.9   txtq_0.2.3        prettyunits_1.1.1
-    #>  [5] assertthat_0.2.1  digest_0.6.25     packrat_0.5.0     R6_2.4.1         
-    #>  [9] cellranger_1.1.0  backports_1.1.8   reprex_0.3.0      evaluate_0.14    
-    #> [13] httr_1.4.2        pillar_1.4.6      rlang_0.4.7       progress_1.2.2   
-    #> [17] readxl_1.3.1      rstudioapi_0.11   blob_1.2.1        rmarkdown_2.3    
-    #> [21] labeling_0.3      igraph_1.2.5      munsell_0.5.0     tinytex_0.25     
-    #> [25] broom_0.7.0       compiler_4.0.2    modelr_0.1.8      xfun_0.16        
-    #> [29] pkgconfig_2.0.3   htmltools_0.5.0   tidyselect_1.1.0  fansi_0.4.1      
-    #> [33] crayon_1.3.4      dbplyr_1.4.4      withr_2.2.0       grid_4.0.2       
-    #> [37] jsonlite_1.7.0    gtable_0.3.0      lifecycle_0.2.0   DBI_1.1.0        
-    #> [41] magrittr_1.5      storr_1.2.1       scales_1.1.1      cli_2.0.2        
-    #> [45] stringi_1.4.6     farver_2.0.3      fs_1.5.0          xml2_1.3.2       
-    #> [49] ellipsis_0.3.1    filelock_1.0.2    generics_0.0.2    vctrs_0.3.2      
-    #> [53] tools_4.0.2       glue_1.4.1        hms_0.5.3         parallel_4.0.2   
-    #> [57] yaml_2.2.1        colorspace_1.4-1  base64url_1.4     rvest_0.3.6      
-    #> [61] knitr_1.29        haven_2.3.1
+    #>  [1] Rcpp_1.0.5       
+    #>  [2] lubridate_1.7.9  
+    #>  [3] txtq_0.2.3       
+    #>  [4] prettyunits_1.1.1
+    #>  [5] assertthat_0.2.1 
+    #>  [6] digest_0.6.25    
+    #>  [7] packrat_0.5.0    
+    #>  [8] R6_2.4.1         
+    #>  [9] cellranger_1.1.0 
+    #> [10] backports_1.1.8  
+    #> [11] reprex_0.3.0     
+    #> [12] evaluate_0.14    
+    #> [13] highr_0.8        
+    #> [14] httr_1.4.2       
+    #> [15] pillar_1.4.6     
+    #> [16] rlang_0.4.7      
+    #> [17] progress_1.2.2   
+    #> [18] readxl_1.3.1     
+    #> [19] rstudioapi_0.11  
+    #> [20] blob_1.2.1       
+    #> [21] rmarkdown_2.3    
+    #> [22] labeling_0.3     
+    #> [23] igraph_1.2.5     
+    #> [24] munsell_0.5.0    
+    #> [25] tinytex_0.25     
+    #> [26] broom_0.7.0      
+    #> [27] compiler_4.0.2   
+    #> [28] modelr_0.1.8     
+    #> [29] xfun_0.16        
+    #> [30] pkgconfig_2.0.3  
+    #> [31] htmltools_0.5.0  
+    #> [32] tidyselect_1.1.0 
+    #> [33] fansi_0.4.1      
+    #> [34] crayon_1.3.4     
+    #> [35] dbplyr_1.4.4     
+    #> [36] withr_2.2.0      
+    #> [37] grid_4.0.2       
+    #> [38] jsonlite_1.7.0   
+    #> [39] gtable_0.3.0     
+    #> [40] lifecycle_0.2.0  
+    #> [41] DBI_1.1.0        
+    #> [42] magrittr_1.5     
+    #> [43] storr_1.2.1      
+    #> [44] scales_1.1.1     
+    #> [45] cli_2.0.2        
+    #> [46] stringi_1.4.6    
+    #> [47] farver_2.0.3     
+    #> [48] fs_1.5.0         
+    #> [49] xml2_1.3.2       
+    #> [50] ellipsis_0.3.1   
+    #> [51] filelock_1.0.2   
+    #> [52] generics_0.0.2   
+    #> [53] vctrs_0.3.2      
+    #> [54] tools_4.0.2      
+    #> [55] glue_1.4.1       
+    #> [56] hms_0.5.3        
+    #> [57] parallel_4.0.2   
+    #> [58] yaml_2.2.1       
+    #> [59] colorspace_1.4-1 
+    #> [60] base64url_1.4    
+    #> [61] rvest_0.3.6      
+    #> [62] knitr_1.29       
+    #> [63] haven_2.3.1
 
 </details>
