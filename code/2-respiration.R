@@ -68,13 +68,13 @@ calculate_moles_CO2C = function(headspace, licor_clean){
   
   headspace_calc  = 
     headspace %>% 
-    mutate(mmol_air = 1000*(P*headspace_vol_mL)/(R*Temp))
+    mutate(mmol_air = 1000*(P*headspace_cm3)/(R*Temp))
   
   licor_clean %>% 
     left_join(dplyr::select(headspace_calc, core, mmol_air), by = "core") %>% 
-    mutate(mmol_CO2C = pCO2_ppm * mmol_air/1000000,
+    mutate(mmol_CO2C = CO2_ppm * mmol_air/1000000,
            umol_CO2C = round(mmol_CO2C * 1000,3)) %>% 
-    dplyr::select(core, pCO2_ppm, umol_CO2C)
+    dplyr::select(core, CO2_ppm, umol_CO2C)
   
   #list(licor_clean2 = licor_clean2)
 }
@@ -199,7 +199,9 @@ plot_respiration = function(respiration){
 respiration_processing_plan = 
   drake_plan(
     core_key = read.csv(file_in("data/core_key.csv")) %>% mutate(core = as.character(core)),
-    headspace = read.csv("data/respiration_headspace.csv"),
+    #headspace = read.csv("data/respiration_headspace.csv"),
+    headspace = read.csv("data/core_weights.csv") %>% dplyr::select(core, headspace_cm3) %>% 
+      mutate(core = as.character(core)),
     resp_lgr = read.csv("data/respiration_lgr_output.csv"),
     resp_licor = read.csv("data/respiration_licor_output.csv"),
     
