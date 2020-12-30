@@ -198,7 +198,7 @@ plot_respiration = function(respiration){
 # respiration processing plan ---------------------------------------------------------------------
 respiration_processing_plan = 
   drake_plan(
-    core_key = read.csv(file_in("data/core_key.csv")) %>% mutate(core = as.character(core)),
+    core_key = read.csv(file_in("data/core_key.csv")) %>% mutate(core = as.character(core)) %>% filter(skip != "skip"),
     #headspace = read.csv("data/respiration_headspace.csv"),
     headspace = read.csv("data/core_weights.csv") %>% dplyr::select(core, headspace_cm3) %>% 
       mutate(core = as.character(core)),
