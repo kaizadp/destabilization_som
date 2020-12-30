@@ -34,21 +34,31 @@ calculate_RC13 = function(lgr_clean){
 clean_licor_output = function(resp_licor){
   resp_licor_temp = 
     resp_licor %>% 
-    rename(pCO2_ppm = `pCO2.raw..ppm.`) %>% 
-    dplyr::select(ID, pCO2_ppm) %>% 
+    rename(CO2_ppm = `Final.CO2`,
+           pCO2_ppm = `pCO2.raw..ppm.`,
+           CO2_ppm = `Final.CO2`) %>% 
+    dplyr::select(ID, CO2_ppm, pCO2_ppm) %>% 
+    filter(!grepl("B", ID)) %>% # remove replicates
     separate(ID, sep = ":", into = c("core", "B")) %>% 
     dplyr::select(-B)
   
-  ambient = 
+  ambient_pCO2 = 
     resp_licor_temp %>% 
     mutate(ambient = grepl("A", core)) %>% 
     filter(ambient) %>% 
     filter(!core %in% "A1") %>% 
     dplyr::summarise(pCO2_ppm = round(mean(pCO2_ppm),3)) %>% pull()
   
+  ambient = 
+    resp_licor_temp %>% 
+    mutate(ambient = grepl("A", core)) %>% 
+    filter(ambient) %>% 
+    filter(!core %in% "A1") %>% 
+    dplyr::summarise(CO2_ppm = round(mean(CO2_ppm),3)) %>% pull()
   
   resp_licor_temp %>% 
-    mutate(pCO2_ppm = pCO2_ppm - ambient)
+    mutate(pCO2_ppm = pCO2_ppm - ambient_pCO2,
+           CO2_ppm = CO2_ppm - ambient)
     
 }
 calculate_moles_CO2C = function(headspace, licor_clean){
