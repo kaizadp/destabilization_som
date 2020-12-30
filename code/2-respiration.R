@@ -146,7 +146,7 @@ theme_kp <- function() {  # this for all the elements common across plots
 }
 
 plot_respiration = function(respiration){
-  gg_resp = 
+  gg_resp_old = 
     respiration %>% 
     ggplot(aes(x = treatment, y = pCO2_ppm, color = type))+
     geom_boxplot()+
@@ -154,6 +154,18 @@ plot_respiration = function(respiration){
     scale_color_manual(values = pnw_palette("Sailboat", 3))+
     labs(title = "partial pressure of CO2",
          y = "pCO2, ppm", 
+         caption = "blank-corrected with ambient")+
+    theme_kp()+
+    NULL
+  
+  gg_resp = 
+    respiration %>% 
+    ggplot(aes(x = treatment, y = CO2_ppm, color = type))+
+    geom_boxplot()+
+    geom_point(size=3, position = position_dodge(width = 0.75))+
+    scale_color_manual(values = pnw_palette("Sailboat", 3))+
+    labs(title = "CO2 concentration",
+         y = "CO2, ppm", 
          caption = "blank-corrected with ambient")+
     theme_kp()+
     NULL
