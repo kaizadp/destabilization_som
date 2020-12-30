@@ -45,6 +45,11 @@ soilc_plan =
     ## b. plot
     gg_soil = plot_soilc(soil_combined, core_key),
     
+    ## c. output
+    soil_combined %>% 
+      write.csv("data/processed/soil_combined.csv", row.names = F),
+    
+    
     # REPORT ------------------------------------------------------------------
     report = rmarkdown::render(
       knitr_in("reports/irms_report.Rmd"),
