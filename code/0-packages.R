@@ -20,6 +20,12 @@ TC_WEOC_REPORT = "data/irms/tc_weoc_report.csv"
 WEOC_SUBSAMPLING = "data/irms/irms_weoc_subsampling.csv"
 WEOC_CAPSULES = "data/irms/weoc_capsuleweights.csv"
 
+SOIL_PROCESSED = "data/processed/soil_processed.csv"
+WEOC_PROCESSED = "data/processed/weoc_processed.csv"
+
+## RESPIRATION
+RESPIRATION_PROCESSED = "data/processed/respiration_processed.csv"
+
 # 3. SET GGPLOT THEME -----------------------------------------------------
 
 theme_kp <- function() {  # this for all the elements common across plots
