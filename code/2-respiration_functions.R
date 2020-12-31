@@ -1,10 +1,25 @@
+# SOM DESTABILIZATION
+# KAIZAD F. PATEL
+# Aug 31, 2020
+
+#################### #
+#################### #
+
+# 2-respiration_functions
+
+## This script contains functions to process/clean and analyze respiration data.
+## These are just the functions, and will be run as part of the processing {drake} plan in a subsequent script.
+## You do not need to run this file, it will be sourced in the {drake} plan.
+
+#################### #
+#################### #
 
 
 library(tidyverse)
 library(drake)
 library(PNWColors)
 
-# respiration functions -- compute ---------------------------------------------------
+# respiration functions -- computing ---------------------------------------------------
 
 clean_lgr_output = function(resp_lgr){
   resp_lgr %>% 
@@ -17,8 +32,14 @@ clean_lgr_output = function(resp_lgr){
     dplyr::select(-B, -C) %>% 
     separate(A, sep = "_", into = c("core", "B")) %>% 
     dplyr::select(-B) %>% 
-    mutate(core = str_replace_all(core, ":",""))
+    mutate(core = str_replace_all(core, ":","")) %>% 
+    dplyr::select(core, D13C_VPDB_CO2) %>% 
+    group_by(core) %>% 
+    dplyr::summarise(D13C_VPDB_CO2 = mean(D13C_VPDB_CO2))
 }
+
+# the calculate_RC13 function (below) is rendered redundant by the D13C_VPDB in the `resp_lgr` file
+# CO2_636_ppm/CO2_626_ppm gives the 13R value, which can then be used to calculate D13C.
 calculate_RC13 = function(lgr_clean){
   lgr_clean %>% 
     group_by(core) %>% 
@@ -28,13 +49,15 @@ calculate_RC13 = function(lgr_clean){
     ungroup() %>% 
     mutate(RC13 = CO2_636_ppm/CO2_626_ppm,
            D13C_calc = ((RC13/0.011237)-1)*1000) %>% 
-    dplyr::select(-CO2_626_ppm, -CO2_636_ppm, -D13C_VPDB_CO2)
+    dplyr::select(-CO2_626_ppm, -CO2_636_ppm, -D13C_VPDB_CO2) %>% 
+    rename(resp_R13C = RC13,
+           resp_D13C = D13C_calc)
 }
 
 clean_licor_output = function(resp_licor){
   resp_licor_temp = 
     resp_licor %>% 
-    rename(CO2_ppm = `Final.CO2`,
+    rename(
            pCO2_ppm = `pCO2.raw..ppm.`,
            CO2_ppm = `Final.CO2`) %>% 
     dplyr::select(ID, CO2_ppm, pCO2_ppm) %>% 
@@ -61,20 +84,32 @@ clean_licor_output = function(resp_licor){
            CO2_ppm = CO2_ppm - ambient)
     
 }
-calculate_moles_CO2C = function(headspace, licor_clean){
+calculate_moles_CO2C = function(headspace, licor_clean, core_weights){
   P = 1         # atm
   R = 82.05			# cm3 atm K−1 mol−1
   Temp = 21+273 # K 
   
+  # calculate moles of air in the core headspace
+  # PV = nRT
   headspace_calc  = 
     headspace %>% 
-    mutate(mmol_air = 1000*(P*headspace_cm3)/(R*Temp))
+    mutate(mol_air = (P*headspace_cm3)/(R*Temp))
   
+  # calculate moles of CO2 in the core headspace
+  # moles CO2/moles air = CO2 conc (ppm)
   licor_clean %>% 
-    left_join(dplyr::select(headspace_calc, core, mmol_air), by = "core") %>% 
-    mutate(mmol_CO2C = CO2_ppm * mmol_air/1000000,
-           umol_CO2C = round(mmol_CO2C * 1000,3)) %>% 
-    dplyr::select(core, CO2_ppm, umol_CO2C)
+    left_join(dplyr::select(headspace_calc, core, mol_air), by = "core") %>% 
+    mutate(mol_CO2C = (CO2_ppm/1000000) * mol_air,
+           umol_CO2C = round(mol_CO2C * 1000000,3)) %>% 
+    dplyr::select(core, CO2_ppm, umol_CO2C) %>% 
+    # now convert moles CO2C to grams CO2C
+    # and then normalize to total soil weight
+    left_join(core_weights %>% dplyr::select(core, od_soil_g), by = "core") %>% 
+    mutate(mg_CO2C = umol_CO2C * 12 * 1000,
+           CO2C_mg_g = mg_CO2C/od_soil_g,
+           CO2C_mg_g = round(CO2C_mg_g, 2)) %>% 
+    dplyr::select(core, CO2_ppm, umol_CO2C, CO2C_mg_g)
+    
   
   #list(licor_clean2 = licor_clean2)
 }
