@@ -29,6 +29,17 @@ core_weights %>%
   mutate(headspace_cm3 = 496.5 - 68.5) %>% 
   write.csv(COREWEIGHTS, row.names = F, na = "")
 
+
+GRAVMOIST = 0.0261
+core_weights_processed = 
+  core_weights %>% 
+  dplyr::select(core, soil_g, headspace_cm3) %>% 
+  rename(fm_soil_g = soil_g) %>% 
+  mutate(od_soil_g = fm_soil_g/(GRAVMOIST+1),
+         od_soil_g = round(od_soil_g, 1)) %>% 
+  write.csv("data/processed/core_weights.csv", row.names = F, na = "")
+
+
 # drying/drying-rewetting soils are drying
 # the `drydown` file tracks the weight to see how much water was lost  
 core_weights_drydown = read_sheet("1PR-VvyKcZIYoH3VF8bBWmzkmAnPibf0Fyd_EVrEqvcc", sheet = "drydown")
