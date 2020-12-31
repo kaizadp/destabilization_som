@@ -45,19 +45,20 @@ process_weoc_files = function(irms_weoc_report, tc_weoc_report, weoc_traykey){
   # 1. IRMS --------------------------------------------------------------------
   C_VPDB = 0.011237
   
-  ## a. clean and get d13C, R13/12C values for all reps
+  ## a. clean and get d13C values for all reps
   irms_weoc_allreps = 
     irms_weoc_report %>% 
     dplyr::select(name, sample_group, d13C_VPDB) %>% 
     filter(sample_group == "samples") %>% 
     left_join(weoc_traykey, by = "name") %>% 
     filter(!is.na(core)) %>% 
-    mutate(
-      R13C = ((d13C_VPDB/1000) + 1) * C_VPDB,
-      R13C = round(R13C, 6)) %>% 
-    dplyr::select(core, weoc_rep, d13C_VPDB, R13C)
+  #  mutate(
+  #    R13C = ((d13C_VPDB/1000) + 1) * C_VPDB,
+  #    R13C = round(R13C, 6)) %>% 
+    dplyr::select(core, weoc_rep, d13C_VPDB) %>% 
+    mutate(core = as.character(core))
   
-  ## b. make wide form with measures of variance
+  ## b. make wide form with measures of variance, for QC
   irms_weoc_cv = 
     irms_weoc_allreps %>% 
     dplyr::select(core, weoc_rep, d13C_VPDB) %>% 
@@ -76,34 +77,37 @@ process_weoc_files = function(irms_weoc_report, tc_weoc_report, weoc_traykey){
            d13C_C = C) %>% 
     arrange(core)
   
-  #  irms_weoc_outliers = 
-  #    irms_weoc %>% 
-  #    dplyr::select(core, weoc_rep, d13C_VPDB) %>% 
-  #    group_by(core) %>% 
-  #    dplyr::mutate(sd = round(sd(d13C_VPDB), 2),
-  #                  cv = round(sd/mean(d13C_VPDB), 2),
-  #                  cv = abs(cv),
-  #                  mean = mean(d13C_VPDB),
-  #                  out = d13C_VPDB-mean,
-  #                  outlier = (d13C_VPDB-mean) > (3*sd))
-  #  
-  
-  ## c. get WEOC summary (don't do???)
-  irms_weoc_summary = 
-    irms_weoc_allreps %>% 
-    ungroup() %>% 
-    group_by(core) %>% 
-    dplyr::summarize(d13C_VPDB = round(mean(d13C_VPDB), 2),
-                     R13C = round(mean(R13C), 6))
-  
-  #  
-  
+  ## TO DO: IDENTIFY OUTLIERS USING outliers::dixon.test()
+
+          #  irms_weoc_outliers = 
+          #    irms_weoc %>% 
+          #    dplyr::select(core, weoc_rep, d13C_VPDB) %>% 
+          #    group_by(core) %>% 
+          #    dplyr::mutate(sd = round(sd(d13C_VPDB), 2),
+          #                  cv = round(sd/mean(d13C_VPDB), 2),
+          #                  cv = abs(cv),
+          #                  mean = mean(d13C_VPDB),
+          #                  out = d13C_VPDB-mean,
+          #                  outlier = (d13C_VPDB-mean) > (3*sd))
+          #  
+          
+          ## c. get WEOC summary (don't do???)
+          ##  irms_weoc_summary = 
+          ##    irms_weoc_allreps %>% 
+          ##    ungroup() %>% 
+          ##    group_by(core) %>% 
+          ##    dplyr::summarize(d13C_VPDB = round(mean(d13C_VPDB), 2),
+          ##                     R13C = round(mean(R13C), 6))
+          ##  
+          #  
+          
   
   # 2. TC ----------------------------------------------------------------------
   SLOPE_weoc = do_calibration(tc_weoc_report)$slope
   INTERCEPT_weoc = do_calibration(tc_weoc_report)$intercept
   
   ## a. clean data for all reps
+  # first, calculate the amount of C detected in each WEOC sample
   tc_weoc = 
     tc_weoc_report %>% 
     filter(is.na(Memo)) %>% 
@@ -111,33 +115,38 @@ process_weoc_files = function(irms_weoc_report, tc_weoc_report, weoc_traykey){
     mutate(C_mg_calc = round(C_area*SLOPE_weoc + INTERCEPT_weoc, 3)) %>% 
     left_join(weoc_traykey, by = c("Name" = "name")) %>% 
     filter(!is.na(core)) %>% 
-    #mutate(core = as.character(core)) %>% 
+    mutate(core = as.character(core)) %>% 
     dplyr::select(core, weoc_rep, weight_mg, C_mg_calc)
   
-  ## now bring in weights data for proper unit conversion
+  ## now bring in weights data for proper unit conversion, normalized to soil weight
   ## 3.5 g --> 35 mL extract
   ## 2 mL extract --> weight mg
   weoc_subsampling = readd(weoc_subsampling)
   weoc_capsuleweights = readd(weoc_capsuleweights)
   
+  # process subsampling weights
+  # we need to know how much soil vs. water was in each sample extracted
   weoc_subsampling2 = 
     weoc_subsampling %>% 
     dplyr::select(core, weoc_g, moisture_perc) %>% 
     drop_na() %>% 
-    mutate(core = as.integer(as.character(core)),
+    mutate(core = as.character(core),
            moisture_perc = round(moisture_perc,2),
            weoc_drywt_g = weoc_g/((moisture_perc/100)+1),
            weoc_drywt_g = round(weoc_drywt_g, 2),
            water_g = weoc_g - weoc_drywt_g) %>% 
     dplyr::select(core, weoc_drywt_g, water_g)
   
+  # clean the capsule weights data
+  # this is the weight of the WEOC extract that was filled in each capsule
   weoc_capsuleweights2 = 
     weoc_capsuleweights %>% 
     dplyr::select(core, weoc_rep, wt_filtered_extract_g) %>% 
     filter(weoc_rep %in% c("A", "B", "C")) %>% 
-    mutate(core = as.integer(as.character(core))) %>% 
+    mutate(core = as.character(core)) %>% 
     drop_na()
   
+  # now, combine them to calculate WEOC normalized to soil weight
   tc_weoc_allreps = 
     tc_weoc %>% 
     left_join(weoc_capsuleweights2, by = c("core", "weoc_rep")) %>% 
@@ -169,15 +178,14 @@ process_weoc_files = function(irms_weoc_report, tc_weoc_report, weoc_traykey){
   #
   # 3. combined ----------------------------------------------------------------
   weoc_combined_allreps = 
-    left_join(tc_weoc_allreps, irms_weoc_allreps, by = c("core", "weoc_rep")) %>% 
-    mutate(C13_mg = R13C/(1+R13C))
+    left_join(tc_weoc_allreps, irms_weoc_allreps, by = c("core", "weoc_rep")) 
+  # %>% mutate(C13_mg = R13C/(1+R13C))
   
   weoc_combined = 
     weoc_combined_allreps %>% 
     group_by(core) %>% 
     dplyr::summarise(weoc_mg_g = round(mean(weoc_mg_g), 3),
-                     d13C_VPDB = round(mean(d13C_VPDB), 2),
-                     R13C = round(mean(R13C), 4)
+                     d13C_VPDB = round(mean(d13C_VPDB), 2)
     )
   
   #  
@@ -193,7 +201,7 @@ process_soil_files = function(irms_soil_report, tc_soil_report, soil_traykey){
   # 1. IRMS --------------------------------------------------------------------
   C_VPDB = 0.011237
   
-  ## a. clean and get d13C, R13/12C values for all reps
+  ## a. clean and get d13C values for all reps
   vec <- rep(c("a", "b", "c"), 45)
   irms_soil_allreps = 
     irms_soil_report %>% 
@@ -203,9 +211,9 @@ process_soil_files = function(irms_soil_report, tc_soil_report, soil_traykey){
     filter(!is.na(core)) %>% 
     mutate(
       rep = vec,
-      R13C = ((d13C_VPDB/1000) + 1) * C_VPDB,
-      R13C = round(R13C, 6)) %>% 
-    dplyr::select(core, rep, d13C_VPDB, R13C)
+      # R13C = ((d13C_VPDB/1000) + 1) * C_VPDB, R13C = round(R13C, 6)
+      ) %>% 
+    dplyr::select(core, rep, d13C_VPDB)
   
   ## b. make wide form with measures of variance
   irms_soil_cv = 
@@ -226,27 +234,27 @@ process_soil_files = function(irms_soil_report, tc_soil_report, soil_traykey){
            d13C_C = c) %>% 
     arrange(core)
   
-  #  irms_weoc_outliers = 
-  #    irms_weoc %>% 
-  #    dplyr::select(core, weoc_rep, d13C_VPDB) %>% 
-  #    group_by(core) %>% 
-  #    dplyr::mutate(sd = round(sd(d13C_VPDB), 2),
-  #                  cv = round(sd/mean(d13C_VPDB), 2),
-  #                  cv = abs(cv),
-  #                  mean = mean(d13C_VPDB),
-  #                  out = d13C_VPDB-mean,
-  #                  outlier = (d13C_VPDB-mean) > (3*sd))
-  #  
-  
-  ## c. get soil summary (don't do???)
-  irms_soil_summary = 
-    irms_soil_allreps %>% 
-    ungroup() %>% 
-    group_by(core) %>% 
-    dplyr::summarize(d13C_VPDB = round(mean(d13C_VPDB), 2),
-                     R13C = round(mean(R13C), 6))
-  
-  #  
+        #  irms_weoc_outliers = 
+        #    irms_weoc %>% 
+        #    dplyr::select(core, weoc_rep, d13C_VPDB) %>% 
+        #    group_by(core) %>% 
+        #    dplyr::mutate(sd = round(sd(d13C_VPDB), 2),
+        #                  cv = round(sd/mean(d13C_VPDB), 2),
+        #                  cv = abs(cv),
+        #                  mean = mean(d13C_VPDB),
+        #                  out = d13C_VPDB-mean,
+        #                  outlier = (d13C_VPDB-mean) > (3*sd))
+        #  
+        
+        ## c. get soil summary (don't do)
+        ## irms_soil_summary = 
+        ##   irms_soil_allreps %>% 
+        ##   ungroup() %>% 
+        ##   group_by(core) %>% 
+        ##   dplyr::summarize(d13C_VPDB = round(mean(d13C_VPDB), 2),
+        ##                    R13C = round(mean(R13C), 6))
+        
+        #  
   
   
   # 2. TC ----------------------------------------------------------------------
@@ -277,15 +285,15 @@ process_soil_files = function(irms_soil_report, tc_soil_report, soil_traykey){
   #
   # 3. combined ----------------------------------------------------------------
   soil_combined_allreps = 
-    left_join(tc_soil_allreps, irms_soil_allreps, by = c("core", "rep")) %>% 
-    mutate(C13_mg = R13C/(1+R13C))
+    left_join(tc_soil_allreps, irms_soil_allreps, by = c("core", "rep")) 
+  # %>% mutate(C13_mg = R13C/(1+R13C))
   
   soil_combined = 
     soil_combined_allreps %>% 
     group_by(core) %>% 
     dplyr::summarise(totalC_perc = round(mean(totalC_perc), 2),
-                     d13C_VPDB = round(mean(d13C_VPDB), 2),
-                     R13C = round(mean(R13C), 6)
+                     totalC_mg_g = totalC_perc * 10,
+                     d13C_VPDB = round(mean(d13C_VPDB), 2)
     )
   
   #  
