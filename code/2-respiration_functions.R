@@ -106,8 +106,7 @@ calculate_moles_CO2C = function(headspace, licor_clean, core_weights){
     # and then normalize to total soil weight
     left_join(core_weights %>% dplyr::select(core, od_soil_g), by = "core") %>% 
     mutate(mg_CO2C = umol_CO2C * 12 / 1000,
-           CO2C_mg_g = mg_CO2C/od_soil_g,
-           CO2C_mg_g = round(CO2C_mg_g, 2)) %>% 
+           CO2C_mg_g = mg_CO2C/od_soil_g) %>% 
     dplyr::select(core, CO2_ppm, umol_CO2C, CO2C_mg_g)
     
   
