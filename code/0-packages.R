@@ -1,4 +1,17 @@
+# SOM DESTABILIZATION
+# KAIZAD F. PATEL
+# Aug 31, 2020
 
+#################### #
+#################### #
+
+# 0-packages
+
+## This script contains packages and file paths needed to run the scripts.
+## `source` this script in the script you want to run. 
+
+#################### #
+#################### #
 # 1. LOAD PACKAGES --------------------------------------------------------
 library(tidyverse)
 library(drake)
