@@ -295,7 +295,9 @@ combined_label = tribble(
 
   
   
-)
+) %>% 
+    mutate(fraction = factor(fraction, levels = c("respiration", "weoc", "soil")))
+
 ```
 
 
