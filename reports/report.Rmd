@@ -280,8 +280,8 @@ combined_label = tribble(
   ~type, ~treatment, ~fraction, ~d13C_VPDB, ~C_mg, ~label,
   "desorption", "1-time-zero", "respiration", 100, NA, "a",
   "desorption", "2-wetting", "respiration", 100, NA, "ab",
-  "desorption", "3-drying", "respiration", 100, NA, "b",
-  "desorption", "4-drying-rewetting", "respiration", 100, NA, "c",
+  "desorption", "3-drying", "respiration", 100, NA, "c",
+  "desorption", "4-drying-rewetting", "respiration", 100, NA, "b",
   
   "desorption", "1-time-zero", "respiration", NA, 0.03, "a",
   "desorption", "2-wetting", "respiration", NA, 0.03, "b",
