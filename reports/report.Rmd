@@ -166,9 +166,6 @@ combined_data_processed =
   # convert delta into R and F
 ```
 
-
-
-
 <details>
   <summary>overall, preliminary plots</summary>
 
@@ -255,6 +252,53 @@ combined_data_processed %>%
 
 ## DESORPTION SAMPLES 
 
+```{r, include=FALSE}
+## stats
+library(agricolae)
+
+a = aov(C_mg ~ treatment, data = combined_data_processed %>% dplyr::filter(type == "control" & fraction == "respiration"))
+(h = HSD.test(a, "treatment"))
+
+a = aov(d13C_VPDB ~ treatment, data = combined_data_processed %>% dplyr::filter(type == "desorption" & fraction == "respiration"))
+(h = HSD.test(a, "treatment"))
+
+a = aov(C_mg ~ treatment, data = combined_data_processed %>% dplyr::filter(type == "desorption" & fraction == "respiration"))
+(h = HSD.test(a, "treatment"))
+
+a = aov(C13_mg ~ treatment, data = combined_data_processed %>% dplyr::filter(type == "desorption" & fraction == "respiration"))
+(h = HSD.test(a, "treatment"))
+
+a = aov(C_mg ~ treatment, data = combined_data_processed %>% dplyr::filter(type == "desorption" & fraction == "weoc"))
+(h = HSD.test(a, "treatment"))
+
+a = aov(C_mg ~ treatment, data = combined_data_processed %>% dplyr::filter(type == "desorption" & fraction == "soil"))
+(h = HSD.test(a, "treatment"))
+```
+
+```{r}
+combined_label = tribble(
+  ~type, ~treatment, ~fraction, ~d13C_VPDB, ~C_mg, ~label,
+  "desorption", "1-time-zero", "respiration", 100, NA, "a",
+  "desorption", "2-wetting", "respiration", 100, NA, "ab",
+  "desorption", "3-drying", "respiration", 100, NA, "b",
+  "desorption", "4-drying-rewetting", "respiration", 100, NA, "c",
+  
+  "desorption", "1-time-zero", "respiration", NA, 0.03, "a",
+  "desorption", "2-wetting", "respiration", NA, 0.03, "b",
+  "desorption", "3-drying", "respiration", NA, 0.03, "c",
+  "desorption", "4-drying-rewetting", "respiration", NA, 0.03, "a"
+  
+#  "desorption", "1-time-zero", "weoc", 
+#  "desorption", "2-wetting", "weoc", 
+#  "desorption", "3-drying", "weoc", 
+#  "desorption", "4-drying-rewetting", "weoc", 
+
+  
+  
+)
+```
+
+
 ```{r, fig.height=7, fig.width=5}
 # graphs ------------------------------------------------------------------
 control_summary = 
@@ -273,6 +317,7 @@ combined_data_key %>%
   ggplot(aes(x = treatment, y = d13C_VPDB, color = fraction))+
   geom_hline(data = control_summary, aes(yintercept = d13C_VPDB), linetype = "dashed", color = "grey30")+
   geom_point(size = 3, show.legend = FALSE) +
+  geom_text(data = combined_label, aes(label = label), color = "black")+
   scale_color_manual(values = pnw_palette("Sailboat", 3))+
   labs(title = "δ13C enrichment in each fraction",
        caption = "dashed line = avg of control samples")+
@@ -286,7 +331,8 @@ combined_data_processed %>%
   ggplot(aes(x = treatment, y = C_mg, color = fraction))+
   geom_hline(data = control_summary, aes(yintercept = C_mg), linetype = "dashed", color = "grey30")+
   geom_point(size = 3, show.legend = FALSE) +
-  scale_color_manual(values = pnw_palette("Sailboat", 3))+
+    geom_text(data = combined_label, aes(label = label), color = "black")+
+scale_color_manual(values = pnw_palette("Sailboat", 3))+
   labs(title = "total carbon in each fraction (mg)",
        caption = "dashed line = avg of control samples")+
   facet_grid(fraction~., scales = "free_y")+
@@ -308,6 +354,13 @@ combined_data_processed %>%
 # -------------------------------------------------------------------------
 
 ```
+
+- wetting vs. drying-rewetting: 
+  - respiration: similar enrichment. drying-rewetting showed significantly greater CO2 evolution. 
+  - WEOC: similar enrichment and similar amount of WEOC
+- drying increased the WEOC pool and also the WEOC enrichment -- (a) desorption of labelled C, (b) negative enrichment: labelled C accumulated in the WEOC because it was not consumed/respired. the enrichment and size of WEOC pool decreased when the soil was rewet, indicating that it was consumed. 
+
+
 
 ### mass balance
 ```{r, fig.width=8}

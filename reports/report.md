@@ -89,15 +89,25 @@ print(A_mixture)
 
 ## DESORPTION SAMPLES
 
-![](markdown-figs/report/unnamed-chunk-5-1.png)<!-- -->![](markdown-figs/report/unnamed-chunk-5-2.png)<!-- -->![](markdown-figs/report/unnamed-chunk-5-3.png)<!-- -->
+![](markdown-figs/report/unnamed-chunk-7-1.png)<!-- -->![](markdown-figs/report/unnamed-chunk-7-2.png)<!-- -->![](markdown-figs/report/unnamed-chunk-7-3.png)<!-- -->
+
+  - wetting vs. drying-rewetting:
+      - respiration: similar enrichment. drying-rewetting showed
+        significantly greater CO2 evolution.
+      - WEOC: similar enrichment and similar amount of WEOC
+  - drying increased the WEOC pool and also the WEOC enrichment – (a)
+    desorption of labelled C, (b) negative enrichment: labelled C
+    accumulated in the WEOC because it was not consumed/respired. the
+    enrichment and size of WEOC pool decreased when the soil was rewet,
+    indicating that it was consumed.
 
 ### mass balance
 
-![](markdown-figs/report/unnamed-chunk-6-1.png)<!-- -->
+![](markdown-figs/report/unnamed-chunk-8-1.png)<!-- -->
 
 ## PRIMING SAMPLES
 
-![](markdown-figs/report/unnamed-chunk-7-1.png)<!-- -->
+![](markdown-figs/report/unnamed-chunk-9-1.png)<!-- -->
 
 -----
 
@@ -107,7 +117,7 @@ print(A_mixture)
 
 **Kaizad F. Patel**
 
-Date Run: 2021-01-07
+Date Run: 2021-01-08
 
     #> R version 4.0.2 (2020-06-22)
     #> Platform: x86_64-apple-darwin17.0 (64-bit)
@@ -124,26 +134,31 @@ Date Run: 2021-01-07
     #> [1] stats     graphics  grDevices utils     datasets  methods   base     
     #> 
     #> other attached packages:
-    #>  [1] PNWColors_0.1.0 forcats_0.5.0   stringr_1.4.0   dplyr_1.0.1    
-    #>  [5] purrr_0.3.4     readr_1.3.1     tidyr_1.1.1     tibble_3.0.3   
-    #>  [9] ggplot2_3.3.2   tidyverse_1.3.0 drake_7.12.4   
+    #>  [1] agricolae_1.3-3 PNWColors_0.1.0 forcats_0.5.0   stringr_1.4.0  
+    #>  [5] dplyr_1.0.1     purrr_0.3.4     readr_1.3.1     tidyr_1.1.1    
+    #>  [9] tibble_3.0.3    ggplot2_3.3.2   tidyverse_1.3.0 drake_7.12.4   
     #> 
     #> loaded via a namespace (and not attached):
-    #>  [1] Rcpp_1.0.5        lubridate_1.7.9   txtq_0.2.3        prettyunits_1.1.1
-    #>  [5] assertthat_0.2.1  digest_0.6.25     R6_2.4.1          cellranger_1.1.0 
-    #>  [9] backports_1.1.8   reprex_0.3.0      evaluate_0.14     httr_1.4.2       
-    #> [13] pillar_1.4.6      rlang_0.4.7       progress_1.2.2    readxl_1.3.1     
-    #> [17] rstudioapi_0.11   blob_1.2.1        rmarkdown_2.3     labeling_0.3     
-    #> [21] igraph_1.2.5      munsell_0.5.0     broom_0.7.0       compiler_4.0.2   
-    #> [25] modelr_0.1.8      xfun_0.16         pkgconfig_2.0.3   htmltools_0.5.0  
-    #> [29] tidyselect_1.1.0  fansi_0.4.1       crayon_1.3.4      dbplyr_1.4.4     
-    #> [33] withr_2.2.0       grid_4.0.2        jsonlite_1.7.0    gtable_0.3.0     
-    #> [37] lifecycle_0.2.0   DBI_1.1.0         magrittr_1.5      storr_1.2.1      
-    #> [41] scales_1.1.1      cli_2.0.2         stringi_1.4.6     farver_2.0.3     
-    #> [45] fs_1.5.0          xml2_1.3.2        ellipsis_0.3.1    filelock_1.0.2   
-    #> [49] generics_0.0.2    vctrs_0.3.2       tools_4.0.2       glue_1.4.1       
-    #> [53] hms_0.5.3         parallel_4.0.2    yaml_2.2.1        colorspace_1.4-1 
-    #> [57] base64url_1.4     rvest_0.3.6       knitr_1.29        haven_2.3.1
+    #>  [1] nlme_3.1-148      fs_1.5.0          lubridate_1.7.9   filelock_1.0.2   
+    #>  [5] progress_1.2.2    httr_1.4.2        tools_4.0.2       backports_1.1.8  
+    #>  [9] R6_2.4.1          AlgDesign_1.2.0   DBI_1.1.0         questionr_0.7.1  
+    #> [13] colorspace_1.4-1  withr_2.2.0       tidyselect_1.1.0  prettyunits_1.1.1
+    #> [17] klaR_0.6-15       compiler_4.0.2    cli_2.0.2         rvest_0.3.6      
+    #> [21] xml2_1.3.2        labeling_0.3      scales_1.1.1      digest_0.6.25    
+    #> [25] txtq_0.2.3        rmarkdown_2.3     pkgconfig_2.0.3   htmltools_0.5.0  
+    #> [29] labelled_2.5.0    dbplyr_1.4.4      fastmap_1.0.1     highr_0.8        
+    #> [33] rlang_0.4.7       readxl_1.3.1      rstudioapi_0.11   shiny_1.5.0      
+    #> [37] farver_2.0.3      generics_0.0.2    combinat_0.0-8    jsonlite_1.7.0   
+    #> [41] magrittr_1.5      Rcpp_1.0.5        munsell_0.5.0     fansi_0.4.1      
+    #> [45] lifecycle_0.2.0   stringi_1.4.6     yaml_2.2.1        MASS_7.3-51.6    
+    #> [49] storr_1.2.1       grid_4.0.2        blob_1.2.1        parallel_4.0.2   
+    #> [53] promises_1.1.1    crayon_1.3.4      lattice_0.20-41   miniUI_0.1.1.1   
+    #> [57] haven_2.3.1       hms_0.5.3         knitr_1.29        pillar_1.4.6     
+    #> [61] igraph_1.2.5      base64url_1.4     reprex_0.3.0      glue_1.4.1       
+    #> [65] evaluate_0.14     modelr_0.1.8      vctrs_0.3.2       httpuv_1.5.4     
+    #> [69] cellranger_1.1.0  gtable_0.3.0      assertthat_0.2.1  xfun_0.16        
+    #> [73] mime_0.9          xtable_1.8-4      broom_0.7.0       later_1.1.0.1    
+    #> [77] cluster_2.1.0     ellipsis_0.3.1
 
 </details>
 
