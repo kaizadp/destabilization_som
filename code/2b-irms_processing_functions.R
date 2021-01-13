@@ -181,8 +181,25 @@ process_weoc_files = function(irms_weoc_report, tc_weoc_report, weoc_traykey){
     left_join(tc_weoc_allreps, irms_weoc_allreps, by = c("core", "weoc_rep")) 
   # %>% mutate(C13_mg = R13C/(1+R13C))
   
+  ## check for outliers -- d13C
+  fit_dixon_d13C = function(dat){
+    dixon.test(dat %>% pull(d13C_VPDB), opposite = FALSE, two.sided = FALSE) %>% 
+      broom::tidy() %>% 
+      filter(`p.value` <= 0.05) %>% 
+      mutate(d13C_VPDB = parse_number(alternative),
+             outlier = TRUE) %>% 
+      dplyr::select(d13C_VPDB, outlier)
+  }
+  
+  c13_outliers = 
+    weoc_combined_allreps %>%  
+    group_by(core) %>% 
+    do(fit_dixon_d13C(.))
+
   weoc_combined = 
     weoc_combined_allreps %>% 
+    left_join(c13_outliers, by = c("core", "d13C_VPDB")) %>% 
+    filter(is.na(outlier)) %>% 
     group_by(core) %>% 
     dplyr::summarise(weoc_mg_g = round(mean(weoc_mg_g), 3),
                      d13C_VPDB = round(mean(d13C_VPDB), 2)
