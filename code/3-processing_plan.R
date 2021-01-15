@@ -20,8 +20,8 @@
 #################### #
 
 source("code/0-packages.R")
-source("code/2-respiration_functions.R")
-source("code/3-irms_processing.R")
+source("code/2a-respiration_processing_functions.R")
+source("code/2b-irms_processing_functions.R")
 
 
 # respiration processing plan ---------------------------------------------------------------------
