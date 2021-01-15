@@ -35,10 +35,12 @@ core_weights %>%
 GRAVMOIST = 0.0261
 core_weights_processed = 
   core_weights %>% 
+  mutate(headspace_cm3 = 496.5 - 68.5) %>% 
   dplyr::select(core, soil_g, headspace_cm3) %>% 
   rename(fm_soil_g = soil_g) %>% 
   mutate(od_soil_g = fm_soil_g/(GRAVMOIST+1),
-         od_soil_g = round(od_soil_g, 1)) %>% 
+         od_soil_g = round(od_soil_g, 1),
+         od_soil_g = if_else((core<21 | core>35), od_soil_g+5, od_soil_g)) %>% 
   write.csv("data/processed/core_weights.csv", row.names = F, na = "")
 
 
