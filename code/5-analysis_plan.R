@@ -23,6 +23,12 @@ analysis_plan = drake_plan(
   gg_desorption = make_graphs_desorption(combined_data_processed),
   gg_priming = make_graphs_priming(combined_data_processed),
   
+  # 4 mass balance
+  gg_mass_balance = calculate_mass_balance(combined_data_processed),
+  
+  # 5 clay effect
+  gg_tzero = calculate_clay_effect(combined_data_processed),
+  
   # report 
   report = rmarkdown::render(
     knitr_in("reports/slides.Rmd") #, output_format = rmarkdown::pdf_document()
