@@ -22,7 +22,9 @@ library(googlesheets4)
 # load files from googlesheets -----------------------------------------
 
 ## 1. core info ---------------------------------------------------------------
-core_key = read_sheet("1k7-Xdav-tRB13cyf3As_MOUk339u3XUuUrPmRwOg7AU") %>% write.csv(COREKEY, row.names = F)
+core_key = read_sheet("1k7-Xdav-tRB13cyf3As_MOUk339u3XUuUrPmRwOg7AU") %>% 
+  mutate(type = recode(type, "desorption" = "sorbed-C", "priming" = "solution-C")) %>% 
+  write.csv(COREKEY, row.names = F)
 
 core_weights = read_sheet("1PR-VvyKcZIYoH3VF8bBWmzkmAnPibf0Fyd_EVrEqvcc")
 core_weights %>% 
