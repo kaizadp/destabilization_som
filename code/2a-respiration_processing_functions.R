@@ -54,7 +54,7 @@ calculate_RC13 = function(lgr_clean){
            resp_D13C = D13C_calc)
 }
 
-clean_licor_output = function(resp_licor){
+clean_licor_output_x = function(resp_licor){
   resp_licor_temp = 
     resp_licor %>% 
     rename(
@@ -84,6 +84,40 @@ clean_licor_output = function(resp_licor){
            CO2_ppm = CO2_ppm - ambient)
     
 }
+clean_licor_output = function(resp_licor){
+  ## we calculate the partial pressure of CO2 using the formula:
+  ## CO2_post = [(V_eff * CO2_initial) + (V_inj * pCO2)]/[V_eff + V_inj]
+  ## therefore, pCO2 = [{V_eff * (CO2_final - CO2_initial)} + (V_inj * CO2_final)] / V_inj
+  
+  resp_licor_temp = 
+    resp_licor %>% 
+    rename(
+      V_inj = `Inj..Volume`,
+      V_eff = `Eff.Volume`,
+      CO2_initial = `Initial.CO2`,
+      CO2_final = `Final.CO2`,
+      #pCO2_ppm1 = `pCO2.raw..ppm.`,
+      #CO2_ppm = `Final.CO2`
+      ) %>% 
+    dplyr::select(ID, V_inj, V_eff, CO2_initial, CO2_final) %>% 
+    filter(!grepl("B", ID)) %>% # remove replicates
+    separate(ID, sep = ":", into = c("core", "B")) %>% 
+    dplyr::select(-B) %>% 
+    mutate(pCO2_ppm = ((V_eff * (CO2_final-CO2_initial)) + (V_inj * CO2_final))/ V_inj)
+  
+  ambient_pCO2 = 
+    resp_licor_temp %>% 
+    mutate(ambient = grepl("A", core)) %>% 
+    filter(ambient) %>% 
+    filter(!core %in% "A1") %>% 
+    dplyr::summarise(pCO2_ppm = round(mean(pCO2_ppm),3)) %>% pull()
+  
+  resp_licor_temp %>% 
+    mutate(pCO2_ppm = pCO2_ppm - ambient_pCO2) %>% 
+    dplyr::select(core, pCO2_ppm)
+  
+}
+
 calculate_moles_CO2C = function(headspace, licor_clean, core_weights){
   P = 1         # atm
   R = 82.05			# cm3 atm K−1 mol−1
@@ -99,15 +133,15 @@ calculate_moles_CO2C = function(headspace, licor_clean, core_weights){
   # moles CO2/moles air = CO2 conc (ppm)
   licor_clean %>% 
     left_join(dplyr::select(headspace_calc, core, mol_air), by = "core") %>% 
-    mutate(mol_CO2C = (CO2_ppm/1000000) * mol_air,
+    mutate(mol_CO2C = (pCO2_ppm/1000000) * mol_air,
            umol_CO2C = round(mol_CO2C * 1000000,3)) %>% 
-    dplyr::select(core, CO2_ppm, umol_CO2C) %>% 
+    dplyr::select(core, pCO2_ppm, umol_CO2C) %>% 
     # now convert moles CO2C to grams CO2C
     # and then normalize to total soil weight
     left_join(core_weights %>% dplyr::select(core, od_soil_g), by = "core") %>% 
     mutate(mg_CO2C = umol_CO2C * 12 / 1000,
            CO2C_mg_g = mg_CO2C/od_soil_g) %>% 
-    dplyr::select(core, CO2_ppm, umol_CO2C, CO2C_mg_g)
+    dplyr::select(core, pCO2_ppm, umol_CO2C, CO2C_mg_g)
     
   
   #list(licor_clean2 = licor_clean2)
