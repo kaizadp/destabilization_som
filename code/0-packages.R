@@ -16,6 +16,7 @@
 library(tidyverse)
 library(drake)
 library(PNWColors)
+library(outliers)
 
 # 2. SET FILE NAMES/PATHS -------------------------------------------------
 COREKEY = "data/core_key.csv"
