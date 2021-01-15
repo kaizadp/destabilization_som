@@ -9,7 +9,7 @@ analysis_plan = drake_plan(
   soil = read.csv(file_in(SOIL_PROCESSED)),
   weoc = read.csv(file_in(WEOC_PROCESSED)),
   respiration = read.csv(file_in(RESPIRATION_PROCESSED)),
-  core_key = read.csv(file_in("data/core_key.csv")) %>% mutate(core = as.character(core)) %>% filter(skip != "skip"),
+  core_key = read.csv(file_in("data/core_key.csv")) %>% mutate(core = as.character(core)) %>% filter(is.na(skip)),
   core_weights = read.csv("data/processed/core_weights.csv"),
 
   

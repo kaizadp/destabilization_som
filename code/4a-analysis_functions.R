@@ -151,17 +151,17 @@ make_graphs_desorption = function(combined_data_processed){
     # a. set y-axis values
     desorption_label_y = tribble(
       ~type, ~fraction, ~name, ~y,
-      "desorption", "respiration", "d13C_VPDB", 1000,
-      "desorption", "weoc", "d13C_VPDB", 30,
-      "desorption", "soil", "d13C_VPDB", -10,
+      "sorbed-C", "respiration", "d13C_VPDB", 1000,
+      "sorbed-C", "weoc", "d13C_VPDB", 30,
+      "sorbed-C", "soil", "d13C_VPDB", -10,
       
-      "desorption", "respiration", "C_mg_g", 0.0025,
-      "desorption", "weoc", "C_mg_g", 0.14,
-      "desorption", "soil", "C_mg_g", 33,    
+      "sorbed-C", "respiration", "C_mg_g", 0.0025,
+      "sorbed-C", "weoc", "C_mg_g", 0.14,
+      "sorbed-C", "soil", "C_mg_g", 33,    
       
-      "desorption", "respiration", "C13_mg_g", 0.05,
-      "desorption", "weoc", "C13_mg_g", 1.4,
-      "desorption", "soil", "C13_mg_g", 345
+      "sorbed-C", "respiration", "C13_mg_g", 0.05,
+      "sorbed-C", "weoc", "C13_mg_g", 1.4,
+      "sorbed-C", "soil", "C13_mg_g", 345
     )
     
     # b. then, calculate HSD for labels 
@@ -175,7 +175,7 @@ make_graphs_desorption = function(combined_data_processed){
       }
       
       combined_data_processed %>% 
-        filter(type == "desorption") %>% 
+        filter(type == "sorbed-C") %>% 
         dplyr::select(core, type, treatment, fraction, d13C_VPDB, C_mg_g, C13_mg_g) %>% 
         pivot_longer(-c(core, type, treatment, fraction)) %>% 
         group_by(type, fraction, name) %>% 
@@ -193,7 +193,7 @@ make_graphs_desorption = function(combined_data_processed){
   gg_desorp_d13c = 
     combined_data_processed %>% 
     mutate(fraction = factor(fraction, levels = c("respiration", "weoc", "soil"))) %>% 
-    filter(type %in% c("desorption")) %>% 
+    filter(type %in% c("sorbed-C")) %>% 
     ggplot(aes(x = treatment, y = d13C_VPDB, color = fraction))+
     geom_hline(data = control_summary, aes(yintercept = d13C_VPDB), linetype = "dashed", color = "grey30")+
     geom_point(size = 3, show.legend = FALSE) +
@@ -208,7 +208,7 @@ make_graphs_desorption = function(combined_data_processed){
   gg_desorp_c = 
     combined_data_processed %>% 
     mutate(fraction = factor(fraction, levels = c("respiration", "weoc", "soil"))) %>% 
-    filter(type %in% c("desorption")) %>% 
+    filter(type %in% c("sorbed-C")) %>% 
     ggplot(aes(x = treatment, y = C_mg_g, color = fraction))+
     geom_hline(data = control_summary, aes(yintercept = C_mg_g), linetype = "dashed", color = "grey30")+
     geom_point(size = 3, show.legend = FALSE) +
@@ -223,7 +223,7 @@ make_graphs_desorption = function(combined_data_processed){
   gg_desorp_c13 = 
     combined_data_processed %>% 
     mutate(fraction = factor(fraction, levels = c("respiration", "weoc", "soil"))) %>% 
-    filter(type %in% c("desorption")) %>% 
+    filter(type %in% c("sorbed-C")) %>% 
     ggplot(aes(x = treatment, y = C13_mg_g*1000, color = fraction, shape = type))+
     geom_hline(data = control_summary, aes(yintercept = C13_mg_g*1000), linetype = "dashed", color = "grey30")+
     geom_point(size = 3, show.legend = FALSE) +
@@ -246,7 +246,7 @@ make_graphs_priming = function(combined_data_processed){
   gg_priming_d13c = 
     combined_data_processed %>% 
     mutate(fraction = factor(fraction, levels = c("respiration", "weoc", "soil"))) %>% 
-    filter(type %in% c("priming")) %>% 
+    filter(type %in% c("solution-C")) %>% 
     ggplot(aes(x = treatment, y = d13C_VPDB, color = fraction))+
     #geom_hline(data = control_summary, aes(yintercept = d13C_VPDB), linetype = "dashed", color = "grey30")+
     geom_point(size = 3, show.legend = FALSE) +
@@ -261,7 +261,7 @@ make_graphs_priming = function(combined_data_processed){
   gg_priming_c13 = 
     combined_data_processed %>% 
     mutate(fraction = factor(fraction, levels = c("respiration", "weoc", "soil"))) %>% 
-    filter(type %in% c("priming")) %>% 
+    filter(type %in% c("solution-C")) %>% 
     ggplot(aes(x = treatment, y = C13_mg_g*1000, color = fraction))+
     #geom_hline(data = control_summary, aes(yintercept = d13C_VPDB), linetype = "dashed", color = "grey30")+
     geom_point(size = 3, show.legend = FALSE) +
@@ -296,10 +296,10 @@ calculate_mass_balance = function(combined_data_processed){
   
   gg_massbalance_desorp = 
     combined_data_processed_summary %>% 
-    filter(fraction != "soil" & type != "priming") %>% 
+    filter(fraction != "soil" & type != "solution-C") %>% 
     ggplot(aes(x = treatment, y = C13_mg_g*1000, fill = fraction))+
     geom_bar(stat = "identity")+
-    geom_text(data = label %>%  filter(type != "priming"), aes(y = 2.95, label = C13_mg_g*1000))+
+    geom_text(data = label %>%  filter(type != "solution-C"), aes(y = 2.95, label = C13_mg_g*1000))+
     annotate("text", label = "total 13C in soil (μg/g):", x = 0.7, y = 3.10, hjust = 0)+
     facet_wrap(~type)+
     theme_kp()+
@@ -308,10 +308,10 @@ calculate_mass_balance = function(combined_data_processed){
 
   gg_massbalance_priming = 
     combined_data_processed_summary %>% 
-    filter(fraction != "soil" & type == "priming") %>% 
+    filter(fraction != "soil" & type == "solution-C") %>% 
     ggplot(aes(x = treatment, y = C13_mg_g*1000, fill = fraction))+
     geom_bar(stat = "identity")+
-    geom_text(data = label %>%  filter(type == "priming"), aes(y = 2.95, label = C13_mg_g*1000))+
+    geom_text(data = label %>%  filter(type == "solution-C"), aes(y = 2.95, label = C13_mg_g*1000))+
     annotate("text", label = "total 13C in soil (μg/g):", x = 0.7, y = 3.10, hjust = 0)+
     facet_wrap(~type)+
     theme_kp()+
@@ -337,7 +337,7 @@ calculate_mass_balance = function(combined_data_processed){
 }
 
 calculate_clay_effect = function(combined_data_processed){
-  clay = combined_data_processed %>% filter(treatment == "1-time-zero" & type != "desorption") %>% 
+  clay = combined_data_processed %>% filter(treatment == "1-time-zero" & type != "sorbed-C") %>% 
     mutate(fraction = factor(fraction, levels = c("respiration", "weoc", "soil")))
   
   make_tzero_label = function(clay){
@@ -403,14 +403,14 @@ resp_fraction =
   mutate(f_oxalic = (d13C_VPDB - CONTROL_WEOC_D13C)/(OXALIC_D13C - CONTROL_WEOC_D13C))
 
 resp_fraction %>% 
-  filter(type == "priming") %>% 
+  filter(type == "solution-C") %>% 
   ggplot(aes(x = treatment, y = f_oxalic * 100, color = type))+
   geom_point()+
   labs(title = "% contribution of oxalic-13C to respiration")
 
 summary(aov(D13C_calc ~ treatment,
             data = combined_lgr_licor %>% 
-              filter(type == "desorption" & treatment %in% c("2-wetting", "4-drying-rewetting"))
+              filter(type == "sorbed-C" & treatment %in% c("2-wetting", "4-drying-rewetting"))
 ))
 
 }
@@ -423,20 +423,20 @@ summary(aov(D13C_calc ~ treatment,
 
 ##    combined_label = tribble(
 ##      ~type, ~treatment, ~fraction, ~d13C_VPDB, ~C_mg_g, ~label,
-##      "desorption", "1-time-zero", "respiration", 100, NA, "a",
-##      "desorption", "2-wetting", "respiration", 100, NA, "ab",
-##      "desorption", "3-drying", "respiration", 100, NA, "c",
-##      "desorption", "4-drying-rewetting", "respiration", 100, NA, "b",
+##      "sorbed-C", "1-time-zero", "respiration", 100, NA, "a",
+##      "sorbed-C", "2-wetting", "respiration", 100, NA, "ab",
+##      "sorbed-C", "3-drying", "respiration", 100, NA, "c",
+##      "sorbed-C", "4-drying-rewetting", "respiration", 100, NA, "b",
 ##      
-##      "desorption", "1-time-zero", "respiration", NA, 0.03, "a",
-##      "desorption", "2-wetting", "respiration", NA, 0.03, "b",
-##      "desorption", "3-drying", "respiration", NA, 0.03, "c",
-##      "desorption", "4-drying-rewetting", "respiration", NA, 0.03, "a"
+##      "sorbed-C", "1-time-zero", "respiration", NA, 0.03, "a",
+##      "sorbed-C", "2-wetting", "respiration", NA, 0.03, "b",
+##      "sorbed-C", "3-drying", "respiration", NA, 0.03, "c",
+##      "sorbed-C", "4-drying-rewetting", "respiration", NA, 0.03, "a"
 ##      
-##      #  "desorption", "1-time-zero", "weoc", 
-##      #  "desorption", "2-wetting", "weoc", 
-##      #  "desorption", "3-drying", "weoc", 
-##      #  "desorption", "4-drying-rewetting", "weoc", 
+##      #  "sorbed-C", "1-time-zero", "weoc", 
+##      #  "sorbed-C", "2-wetting", "weoc", 
+##      #  "sorbed-C", "3-drying", "weoc", 
+##      #  "sorbed-C", "4-drying-rewetting", "weoc", 
 ##      
 ##      
 ##      
@@ -496,14 +496,14 @@ summary(aov(D13C_calc ~ treatment,
 ##              aov(CO2_ppm ~ type, 
 ##                  data = 
 ##                    a %>% 
-##                    filter(type %in% c("control", "priming") &
+##                    filter(type %in% c("control", "solution-C") &
 ##                             treatment == "1-time-zero" &
 ##                             core != 40))
 ##            )
 ##            
 ##            a_priming = 
 ##              a %>% 
-##              filter(type %in% "priming" & treatment == "1-time-zero")
+##              filter(type %in% "solution-C" & treatment == "1-time-zero")
 ##            
 ##            dixon.test(a_priming %>% pull(CO2_ppm),
 ##                       type = 0, opposite = FALSE, two.sided = TRUE) %>% 
