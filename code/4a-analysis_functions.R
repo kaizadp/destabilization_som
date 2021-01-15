@@ -86,82 +86,52 @@ calculate_indices = function(combined_data_outliers){
 
 make_graphs_prelim = function(combined_data_processed){
   ### Respiration ----
-  gg_resp_d13c = 
+  combined_data_processed = 
     combined_data_processed %>% 
-    filter(fraction == "respiration") %>% 
-    ggplot(aes(x = treatment, y = d13C_VPDB, color = type))+
-    geom_boxplot()+
-    geom_point(size=3, position = position_dodge(width = 0.75))+
-    scale_color_manual(values = pnw_palette("Sailboat", 3))+
-    labs(title = "δ13C-CO2",
-         y = "δ13C, ‰")+
-    theme_kp()+
-    NULL
+    mutate(fraction = factor(fraction, levels = c("respiration", "weoc", "soil")))
   
-  gg_resp_c = 
+  
+  gg_prelim_d13c = 
     combined_data_processed %>% 
-    filter(fraction == "respiration") %>% 
-    ggplot(aes(x = treatment, y = C_mg_g*1000, color = type))+
-    geom_boxplot()+
-    geom_point(size=3, position = position_dodge(width = 0.75))+
-    scale_color_manual(values = pnw_palette("Sailboat", 3))+
-    labs(title = "CO2-C evolved",
-         y = "CO2-C, μg/g", 
-         caption = "blank-corrected with ambient")+
-    theme_kp()+
-    NULL
-  
-  gg_resp_13c = 
-    combined_data_processed %>% 
-    filter(fraction == "respiration") %>% 
-    ggplot(aes(x = treatment, y = C13_mg_g*1000, color = type))+
-    geom_boxplot()+
-    geom_point(size=3, position = position_dodge(width = 0.75))+
-    scale_color_manual(values = pnw_palette("Sailboat", 3))+
-    labs(title = "mg of 13C-CO2 evolved",
-         y = "CO2-13C, μg/g")+
-    theme_kp()+
-    NULL
-  
-  ### Soil and WEOC ----
-  
-  gg_soil_d13c = 
-    combined_data_processed %>% 
-    filter(fraction != "respiration") %>% 
+    #filter(fraction == "respiration") %>% 
     ggplot(aes(x = treatment, y = d13C_VPDB, color = type))+
     geom_boxplot()+
     geom_point(size=3, position = position_dodge(width = 0.75))+
     scale_color_manual(values = pnw_palette("Sailboat", 3))+
     labs(title = "δ13C",
          y = "δ13C, ‰")+
-    facet_grid(fraction ~., scales = "free_y")+
     theme_kp()+
+    facet_grid(fraction~., scales = "free_y")+
     NULL
   
-  gg_soil_c = 
+  gg_prelim_c =
     combined_data_processed %>% 
-    filter(fraction != "respiration") %>% 
-    ggplot(aes(x = treatment, y = C_mg_g, color = type))+
+    #filter(fraction == "respiration") %>% 
+    ggplot(aes(x = treatment, y = C_mg_g*1000, color = type))+
     geom_boxplot()+
     geom_point(size=3, position = position_dodge(width = 0.75))+
     scale_color_manual(values = pnw_palette("Sailboat", 3))+
-    facet_grid(fraction ~., scales = "free_y")+
-    labs(title = "C content")+
+    labs(title = "total C (12C + 13C)",
+         y = "total C, μg/g", 
+         caption = "resp is blank-corrected with ambient")+
     theme_kp()+
+    facet_grid(fraction~., scales = "free_y")+
     NULL
   
-  gg_soil_13c = 
-    combined_data_processed %>% 
-    filter(fraction != "respiration") %>% 
-    ggplot(aes(x = treatment, y = C13_mg_g*1000, color = type))+
-    geom_boxplot()+
-    geom_point(size=3, position = position_dodge(width = 0.75))+
-    scale_color_manual(values = pnw_palette("Sailboat", 3))+
-    labs(title = "mg of 13C",
-         y = "13C, μg/g")+
-    facet_grid(fraction ~., scales = "free_y")+
-    theme_kp()+
-    NULL
+  ##  gg_resp_13c = 
+  ##    combined_data_processed %>% 
+  ##    filter(fraction == "respiration") %>% 
+  ##    ggplot(aes(x = treatment, y = C13_mg_g*1000, color = type))+
+  ##    geom_boxplot()+
+  ##    geom_point(size=3, position = position_dodge(width = 0.75))+
+  ##    scale_color_manual(values = pnw_palette("Sailboat", 3))+
+  ##    labs(title = "mg of 13C-CO2 evolved",
+  ##         y = "CO2-13C, μg/g")+
+  ##    theme_kp()+
+  ##    NULL
+  
+  list(gg_prelim_d13c = gg_prelim_d13c,
+       gg_prelim_c = gg_prelim_c)
 }
 
 make_graphs_desorption = function(combined_data_processed){
@@ -307,9 +277,119 @@ make_graphs_priming = function(combined_data_processed){
   
 }
 
-calculate_mass_balance = function(){}
+calculate_mass_balance = function(combined_data_processed){
+  ## 13C stacked plots
+  combined_data_processed_summary = 
+    combined_data_processed %>% 
+    group_by(treatment, type, fraction) %>%
+    dplyr::summarise(C_mg_g = mean(C_mg_g),
+                     C13_mg_g = mean(C13_mg_g))
+  
+  ## create label for soil 13C
+  ## not plotting the data because very large values
+  label = combined_data_processed_summary %>% 
+    filter(fraction == "soil") %>% 
+    group_by(treatment, type, fraction) %>% 
+    dplyr::summarise(C_mg_g = mean(C_mg_g),
+                     C13_mg_g = mean(C13_mg_g),
+                     C13_mg_g = round(C13_mg_g,3))
+  
+  gg_massbalance_desorp = 
+    combined_data_processed_summary %>% 
+    filter(fraction != "soil" & type != "priming") %>% 
+    ggplot(aes(x = treatment, y = C13_mg_g*1000, fill = fraction))+
+    geom_bar(stat = "identity")+
+    geom_text(data = label %>%  filter(type != "priming"), aes(y = 2.95, label = C13_mg_g*1000))+
+    annotate("text", label = "total 13C in soil (μg/g):", x = 0.7, y = 3.10, hjust = 0)+
+    facet_wrap(~type)+
+    theme_kp()+
+    theme(axis.text.x = element_text(angle = 45))+
+    NULL
 
+  gg_massbalance_priming = 
+    combined_data_processed_summary %>% 
+    filter(fraction != "soil" & type == "priming") %>% 
+    ggplot(aes(x = treatment, y = C13_mg_g*1000, fill = fraction))+
+    geom_bar(stat = "identity")+
+    geom_text(data = label %>%  filter(type == "priming"), aes(y = 2.95, label = C13_mg_g*1000))+
+    annotate("text", label = "total 13C in soil (μg/g):", x = 0.7, y = 3.10, hjust = 0)+
+    facet_wrap(~type)+
+    theme_kp()+
+    theme(axis.text.x = element_text(angle = 45))+
+    NULL
+  
+  
+  gg_mass_balance_soilc = 
+    combined_data_processed_summary %>% 
+    filter(fraction != "soil") %>% 
+    ggplot(aes(x = treatment, y = C_mg_g, fill = fraction))+
+    geom_bar(stat = "identity")+
+    geom_text(data = label, aes(y = 0.25, label = C_mg_g))+
+      annotate("text", label = "total C in soil (mg/g):", x = 0.7, y = 0.28, hjust = 0)+
+      facet_wrap(~type)+
+    theme_kp()+
+    theme(axis.text.x = element_text(angle = 45))+
+    NULL
+  
+  list(gg_massbalance_desorp = gg_massbalance_desorp, 
+       gg_massbalance_priming = gg_massbalance_priming,
+       gg_mass_balance_soilc = gg_mass_balance_soilc)
+}
 
+calculate_clay_effect = function(combined_data_processed){
+  clay = combined_data_processed %>% filter(treatment == "1-time-zero" & type != "desorption") %>% 
+    mutate(fraction = factor(fraction, levels = c("respiration", "weoc", "soil")))
+  
+  make_tzero_label = function(clay){
+    label_y = tribble(
+      ~fraction, ~d13C_y, ~C_y,
+      "respiration", -55, 0,
+      "soil", -28, 27,
+      "weoc", -28, 0)
+    
+    fit_aov_c = function(dat){
+      
+      a = aov(value ~ type, data = dat)
+      broom::tidy(a) %>% 
+        filter(term == "type") %>% 
+        rename(p_value = `p.value`) %>% 
+        mutate(label = case_when(p_value <= 0.05 ~ "*"))
+    }
+    
+    clay %>% 
+      dplyr::select(type, treatment, fraction, C_mg_g, d13C_VPDB) %>% 
+      pivot_longer(-c(type, treatment, fraction)) %>% 
+      group_by(fraction, name) %>% 
+      do(fit_aov_c(.)) %>% 
+      dplyr::select(fraction, name, label) %>% 
+      pivot_wider(names_from = "name", values_from = "label") %>% 
+      left_join(label_y) %>% 
+      mutate(type = "a") %>% 
+      mutate(fraction = factor(fraction, levels = c("respiration", "weoc", "soil")))
+  }
+  tzero_label = make_tzero_label(clay)
+  
+  gg_tzero_d13c = 
+    clay %>% 
+    ggplot(aes(x = type, y = d13C_VPDB, color = type))+
+    geom_point(size = 3, show.legend = FALSE)+
+    geom_text(data = tzero_label, aes(x = 1.5, y = d13C_y, label = d13C_VPDB), color = "black", size = 7)+  
+    facet_grid(fraction~., scales = "free_y")+
+    theme_kp()+
+    NULL
+  
+  gg_tzero_c = 
+    clay %>% 
+    ggplot(aes(x = type, y = C_mg_g, color = type))+
+    geom_point(size = 3, show.legend = FALSE)+
+    geom_text(data = tzero_label, aes(x = 1.5, y = C_y, label = C_mg_g), color = "black", size = 7)+  
+    facet_grid(fraction~., scales = "free_y")+
+    theme_kp()+
+    NULL
+  
+  list(gg_tzero_d13c = gg_tzero_d13c,
+       gg_tzero_c  =gg_tzero_c)
+}
 
 
 # mixing model for respiration --------------------------------------------
