@@ -17,6 +17,7 @@ library(tidyverse)
 library(drake)
 library(PNWColors)
 library(outliers)
+library(patchwork)
 
 # 2. SET FILE NAMES/PATHS -------------------------------------------------
 COREKEY = "data/core_key.csv"
@@ -51,7 +52,8 @@ theme_kp <- function() {  # this for all the elements common across plots
           legend.key.size = unit(1.5, 'lines'),
           panel.border = element_rect(color="black",size=1.5, fill = NA),
           
-          plot.title = element_text(hjust = 0.05, size = 14),
+          plot.title = element_text(hjust = 0.5, size = 14, face = "bold"),
+          plot.subtitle = element_text(hjust = 0.5),
           axis.text = element_text(size = 10, color = "black"),
           axis.title = element_text(size = 12, face = "bold", color = "black"),
           
