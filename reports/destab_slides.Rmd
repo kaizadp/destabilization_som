@@ -1,0 +1,206 @@
+---
+title: "The role of *wetting* vs. *drying* <br> on SOM destabilization"
+author: "Kaizad F. Patel"
+date: "updated: `r Sys.Date()`"
+output:
+  xaringan::moon_reader:
+    css: [default, ki-fonts]
+    lib_dir: libs
+    nature:
+      ratio: 16:9
+      highlightStyle: github
+      highlightLines: true
+      countIncrementalSlides: false
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE,
+                      message = FALSE,
+                      warning = FALSE)
+```
+
+```{css, echo = FALSE}
+.remark-slide-content {
+  font-size: 20px;
+  padding: 20px 80px 20px 80px;
+}
+.remark-code, .remark-inline-code {
+  background: #f0f0f0;
+}
+.remark-code {
+  font-size: 24px;
+}
+.huge .remark-code { /*Change made here*/
+  font-size: 200% !important;
+}
+.small .remark-code { /*Change made here*/
+  font-size: 50% !important;
+}
+```
+
+### Objectives
+
+
+---
+
+### Experiment
+
+- 60 g field-moist soil (~58 g oven-dry equivalent) in pint size Mason jars
+- labelled substrate (13C-oxalic acid, 18.66 % enriched) was added to the soil, adsorbed onto 5 g goethite
+- The soil was subjected to one of the following treatments, after which the jars were sealed:
+  1. wetting: 20 mL water added
+  1. drying: soil allowed to air-dry until constant weight
+  1. drying-rewetting: soil allowed to dry, then rewet with 20 mL water
+  1. time-zero: jars sealed as soon as goethite was added
+- The jars were sealed for 48 hours.
+
+---
+
+### Analyses
+
+1. respiration: headspace samples were collected and analyzed for CO2 and 13C-CO2
+1. WEOC (water extractable organic C): organic carbon extracted and analyzed for C content and 13C
+1. total C: soil was dried and analyzed for C and 13C content
+
+---
+
+
+##### Slide 2
+
+```{r, fig.width=5}
+#readd(gg_prelim)$gg_prelim_d13c
+```
+
+---
+
+##### Slide 2
+
+```{r, fig.width=5}
+#readd(gg_prelim)$gg_prelim_c
+```
+
+---
+
+### Desorption Samples
+
+.pull-left[
+```{r}
+readd(gg_d13c)
+```
+]
+
+.pull-right[
+#### Enrichment
+- CO2/WEOC enrichment did not differ between wetting and drying-rewetting samples.
+  - we expected d+w > wetting
+  - wetting and drying-rewetting mobilized C equally? 
+- soil enrichment remained constant (as expected), except for the air-dried soils
+  - less C was respired when dry, so more labelled 13C accumulated in soil?
+]
+
+---
+
+### Desorption Samples
+
+.pull-left[
+```{r}
+readd(gg_c)
+```
+]
+
+.pull-right[
+#### total C (12C + 13C)
+- more CO2 was evolved after d+w, compared to wetting
+- WEOC was greatest in the air-dried samples
+  - because C was not consumed, and it accumulated in the soil?
+
+]
+
+---
+
+### Priming Samples
+
+.pull-left[
+```{r, fig.height=7, fig.width=3}
+#readd(gg_priming)$gg_priming_d13c
+```
+]
+
+.pull-right[
+- respiration, WEOC, and soil were all enriched after addition of soluble 13C-oxalic acid
+
+]
+
+---
+### Mass Balance
+
+.pull-left[
+```{r}
+readd(gg_mass_balance)$gg_massbalance_desorp
+```
+]
+
+.pull-right[
+#### Desorption Samples
+]
+---
+### Mass Balance
+
+.pull-left[
+```{r}
+readd(gg_mass_balance)$gg_massbalance_priming
+```
+]
+
+
+.pull-right[
+#### Priming Samples
+- 417 ug (`r round(417/58,2)` ug/g) 13C was added as solution
+- partitioned as 0.04 ug/g in respiration and 0.08 ug/g in WEOC
+]
+
+---
+
+### Mass Balance
+
+.pull-left[
+```{r}
+readd(gg_mass_balance)$gg_mass_balance_soilc
+```
+]
+
+
+.pull-right[
+#### total C (12C + 13C)
+
+
+]
+
+---
+
+### How did clay addition alter C?
+
+.pull-left[
+```{r, fig.width=4}
+readd(gg_tzero)$gg_tzero_d13c
+```
+]
+
+.pull-right[
+```{r, fig.width=4}
+readd(gg_tzero)$gg_tzero_c
+```
+]
+
+---
+
+Date run: `r Sys.Date()`
+
+Slides prepared using [xaringan](https://github.com/yihui/xaringan)
+
+
+.small[
+```{r}
+utils:::print.sessionInfo(sessionInfo()[-8])
+```
+]
