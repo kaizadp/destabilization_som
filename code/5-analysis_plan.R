@@ -19,9 +19,12 @@ analysis_plan = drake_plan(
   combined_data_processed = calculate_indices(combined_data_outliers),
   
   # 3 
-  gg_prelim = make_graphs_prelim(combined_data_processed),
-  gg_desorption = make_graphs_desorption(combined_data_processed),
-  gg_priming = make_graphs_priming(combined_data_processed),
+  #gg_prelim = make_graphs_prelim(combined_data_processed),
+  #gg_desorption = make_graphs_desorption(combined_data_processed),
+  #gg_priming = make_graphs_priming(combined_data_processed),
+  
+  gg_d13c = make_graphs_d13c(combined_data_processed),
+  gg_c = make_graphs_c(combined_data_processed),
   
   # 4 mass balance
   gg_mass_balance = calculate_mass_balance(combined_data_processed),
