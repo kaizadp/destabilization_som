@@ -280,6 +280,8 @@ make_graphs_priming2 = function(combined_data_processed){
 }
 
 make_graphs_d13c = function(combined_data_processed){
+  ## UPDATE 2021-01-29: THIS IS NOW DEFUNCT
+  
   # first, calculate mean values for control soils. use this in the graphs
   control_summary = 
     combined_data_processed %>% 
@@ -424,6 +426,8 @@ make_graphs_d13c = function(combined_data_processed){
 }
 
 make_graphs_c = function(combined_data_processed){
+  ## UPDATE 2021-01-29: THIS IS NOW DEFUNCT
+  
   # first, calculate mean values for control soils. use this in the graphs
   control_summary = 
     combined_data_processed %>% 
