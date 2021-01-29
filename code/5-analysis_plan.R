@@ -20,11 +20,11 @@ analysis_plan = drake_plan(
   
   # 3 
   #gg_prelim = make_graphs_prelim(combined_data_processed),
-  #gg_desorption = make_graphs_desorption(combined_data_processed),
-  #gg_priming = make_graphs_priming(combined_data_processed),
+  gg_desorption = make_graphs_desorption(combined_data_processed),
+  gg_priming = make_graphs_priming(combined_data_processed),
   
-  gg_d13c = make_graphs_d13c(combined_data_processed),
-  gg_c = make_graphs_c(combined_data_processed),
+  #gg_d13c = make_graphs_d13c(combined_data_processed),
+  #gg_c = make_graphs_c(combined_data_processed),
   
   # 4 mass balance
   gg_mass_balance = calculate_mass_balance(combined_data_processed),
@@ -34,9 +34,9 @@ analysis_plan = drake_plan(
   
   # report 
   report = rmarkdown::render(
-    knitr_in("reports/slides.Rmd") #, output_format = rmarkdown::pdf_document()
+    knitr_in("reports/destab_slides.Rmd") #, output_format = rmarkdown::pdf_document()
     ),
-  pagedown::chrome_print("reports/slides.html", "ninja3.pdf")
+  #pagedown::chrome_print("reports/destab_slides.html", "reports/destab_slides_2021-01-28.pdf")
   
 )
 

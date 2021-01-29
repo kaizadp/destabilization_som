@@ -134,7 +134,7 @@ make_graphs_prelim = function(combined_data_processed){
        gg_prelim_c = gg_prelim_c)
 }
 
-make_graphs_desorption = function(combined_data_processed){
+make_graphs_desorption2 = function(combined_data_processed){
   ## UPDATE 2021-01-15: THIS IS NOW DEFUNCT
   # first, calculate mean values for control soils. use this in the graphs
   control_summary = 
@@ -242,7 +242,7 @@ make_graphs_desorption = function(combined_data_processed){
        gg_desorp_c13 = gg_desorp_c13)
 }
 
-make_graphs_priming = function(combined_data_processed){
+make_graphs_priming2 = function(combined_data_processed){
   ## UPDATE 2021-01-15: THIS IS NOW DEFUNCT
   
   gg_priming_d13c = 
@@ -367,11 +367,12 @@ make_graphs_d13c = function(combined_data_processed){
   
   aov %>% left_join(aov_y)
 }
-  aov_labels_d13c = make_aov_labels(combined_data_processed)
+  aov_labels_d13c = make_aov_labels(combined_data_processed) %>% 
+    mutate(fraction = factor(fraction, levels = c("respiration", "weoc", "soil")))
 
   # third, make graphs
   
-  (gg_desorp_d13c = 
+  gg_desorp_d13c = 
     combined_data_processed %>% 
     mutate(fraction = factor(fraction, levels = c("respiration", "weoc", "soil"))) %>% 
     filter(!type %in% c("control")) %>% 
@@ -391,9 +392,9 @@ make_graphs_d13c = function(combined_data_processed){
     theme_kp()+
       theme(panel.grid.minor = element_blank(),
             strip.text.y = element_blank())+
-    NULL)
+    NULL
   
-  (gg_priming_13c = 
+  gg_priming_13c = 
       combined_data_processed %>% 
       mutate(fraction = factor(fraction, levels = c("respiration", "weoc", "soil"))) %>% 
       filter(!type %in% c("control")) %>% 
@@ -417,7 +418,7 @@ make_graphs_d13c = function(combined_data_processed){
       theme_kp()+
       theme(panel.grid.minor = element_blank(),
             axis.text.y = element_blank())+
-      NULL)  
+      NULL  
   #library(patchwork)
   gg_desorp_d13c+gg_priming_13c + plot_layout(widths = c(2,1))
 }
@@ -565,7 +566,471 @@ make_graphs_c = function(combined_data_processed){
   
 }
 
+make_graphs_desorption = function(combined_data_processed){
+  make_graphs_desorption_d13c = function(combined_data_processed){
+    # first, calculate mean values for control soils. use this in the graphs ----
+    control_summary = 
+      combined_data_processed %>% 
+      filter(type %in% c("control")) %>% 
+      group_by(fraction) %>% 
+      dplyr::summarise(d13C_VPDB = mean(d13C_VPDB)) %>% 
+      mutate(fraction = factor(fraction, levels = c("respiration", "weoc", "soil")))
+    
+    # second, prepare graph labels ----
+    make_hsd_labels = function(combined_data_processed){
+      # a. set y-axis values
+      desorption_label_y = tribble(
+        ~analysis, ~fraction, ~name, ~y,
+        "HSD",  "respiration", "d13C_VPDB", 2100,
+        "HSD",  "weoc", "d13C_VPDB", 30,
+        "HSD",  "soil", "d13C_VPDB", -10
+      )
+      
+      # b. then, calculate HSD for labels 
+      compute_hsd_desorption = function(combined_data_processed){
+        fit_hsd = function(dat){
+          a = aov(d13C_VPDB ~ treatment, data = dat)
+          h = HSD.test(a, "treatment")
+          h$groups %>% mutate(treatment = row.names(.)) %>% 
+            rename(label = groups) %>%  
+            dplyr::select(treatment, label)
+        }
+        
+        combined_data_processed %>% 
+          filter(type == "sorbed-C") %>% 
+          dplyr::select(core, type, treatment, fraction, d13C_VPDB) %>% 
+          #          pivot_longer(-c(core, type, treatment, fraction)) %>% 
+          group_by(type, fraction) %>% 
+          do(fit_hsd(.)) # %>% pivot_wider(names_from = "name", values_from = "label")
+      }
+      desorption_hsd_label = compute_hsd_desorption(combined_data_processed) %>% 
+        mutate(fraction = factor(fraction, levels = c("respiration", "weoc", "soil")))
+      
+      
+      # c. then, merge the labels with the y
+      desorption_hsd_label %>% left_join(desorption_label_y) %>% 
+        mutate(fraction = factor(fraction, levels = c("respiration", "weoc", "soil")))
+    }
+    hsd_labels_d13c = make_hsd_labels(combined_data_processed)
+    
+    make_aov_labels = function(combined_data_processed){
+      ## AOV_Y
+      aov_y = tribble(
+        ~fraction, ~name, ~y,
+        "respiration", "d13C_VPDB", -300,
+        "weoc", "d13C_VPDB", -40,
+        "soil", "d13C_VPDB", -35
+      )
+      
+      ## AOV
+      make_control = function(combined_data_processed){
+        dat_control = combined_data_processed %>% filter(type == "control") %>% mutate(type2 = "CONTROL")
+        dat1 = dat_control %>% mutate(type = "sorbed-C", treatment = "1-time-zero")
+        dat2 = dat_control %>% mutate(type = "sorbed-C", treatment = "2-wetting")
+        dat3 = dat_control %>% mutate(type = "sorbed-C", treatment = "3-drying")
+        dat4 = dat_control %>% mutate(type = "sorbed-C", treatment = "4-drying-rewetting")
+        
+        rbind(dat1, dat2, dat3, dat4)
+      }
+      control = make_control(combined_data_processed)
+      
+      fit_aov = function(dat){
+        #    dat2 = dat %>% rbind(control)
+        a = aov(d13C_VPDB ~ type2, data = dat)
+        broom::tidy(a) %>% 
+          filter(term == "type2") %>% 
+          rename(p_value = `p.value`) %>% 
+          mutate(label = case_when(p_value <= 0.05 ~ "*"))
+      }
+      aov = combined_data_processed %>% 
+        filter(type == "sorbed-C") %>% 
+        mutate(type2 = "TRT") %>% rbind(control) %>% 
+        group_by(type, treatment, fraction) %>%  #dplyr::summarise(n = n())
+        do(fit_aov(.))
+      
+      aov %>% left_join(aov_y)
+    }
+    aov_labels_d13c = make_aov_labels(combined_data_processed) %>% 
+      mutate(fraction = factor(fraction, levels = c("respiration", "weoc", "soil")))
+    
+    # third, make graphs ----
+    combined_data_processed %>% 
+      mutate(fraction = factor(fraction, levels = c("respiration", "weoc", "soil"))) %>% 
+      filter(!type %in% c("control")) %>% 
+      ggplot(aes(x = treatment, y = d13C_VPDB, color = type))+
+      geom_hline(data = control_summary, aes(yintercept = d13C_VPDB), linetype = "dashed", color = "grey30")+
+      geom_point(size = 3, show.legend = FALSE) +
+      geom_text(data = hsd_labels_d13c %>% filter(type == "sorbed-C"), aes(label = label, y = y), color = "black")+
+      geom_text(data = aov_labels_d13c %>% filter(type == "sorbed-C"), aes(label = label, y = y), color = "black", size = 6)+
+      #scale_color_manual(values = pnw_palette("Sailboat", 3))+
+      scale_color_manual(values = c(NA, "#e89c81"))+
+      scale_x_discrete(labels = c("T0", "W", "D", "DW"))+
+      labs(title = "δ13C (‰)",
+           #caption = "dashed line = avg of control samples",
+           x = "",
+           y = "")+
+      facet_grid(fraction~., scales = "free_y")+
+      theme_kp()+
+      theme(panel.grid.minor = element_blank(),
+            strip.text.y = element_blank())+
+      NULL
+  }
+  gg_desorp_d13c = make_graphs_desorption_d13c(combined_data_processed)
+  
+  make_graphs_desorption_c = function(combined_data_processed){
+    # first, calculate mean values for control soils. use this in the graphs ----
+    control_summary = 
+      combined_data_processed %>% 
+      filter(type %in% c("control")) %>% 
+      group_by(fraction) %>% 
+      dplyr::summarise(C_mg_g = mean(C_mg_g)) %>% 
+      mutate(fraction = factor(fraction, levels = c("respiration", "weoc", "soil")))
+    
+    # second, prepare graph labels ----
+    make_hsd_labels = function(combined_data_processed){
+      # a. set y-axis values
+      desorption_label_y = tribble(
+        ~analysis, ~fraction, ~name, ~y,
+        "HSD",  "respiration", "C_mg_g", 0.15,
+        "HSD",  "weoc", "C_mg_g", 0.15,
+        "HSD",  "soil", "C_mg_g", 35
+      )
+      
+      # b. then, calculate HSD for labels 
+      compute_hsd_desorption = function(combined_data_processed){
+        fit_hsd = function(dat){
+          a = aov(C_mg_g ~ treatment, data = dat)
+          h = HSD.test(a, "treatment")
+          h$groups %>% mutate(treatment = row.names(.)) %>% 
+            rename(label = groups) %>%  
+            dplyr::select(treatment, label)
+        }
+        
+        combined_data_processed %>% 
+          filter(type == "sorbed-C") %>% 
+          dplyr::select(core, type, treatment, fraction, C_mg_g) %>% 
+          #pivot_longer(-c(core, type, treatment, fraction)) %>% 
+          group_by(type, fraction) %>% 
+          do(fit_hsd(.)) # %>% pivot_wider(names_from = "name", values_from = "label")
+      }
+      desorption_hsd_label = compute_hsd_desorption(combined_data_processed) %>% 
+        mutate(fraction = factor(fraction, levels = c("respiration", "weoc", "soil")))
+      
+      # c. then, merge the labels with the y
+      desorption_hsd_label %>% left_join(desorption_label_y) %>% 
+        mutate(fraction = factor(fraction, levels = c("respiration", "weoc", "soil")))
+    }
+    hsd_labels_c = make_hsd_labels(combined_data_processed) %>% 
+      mutate(fraction = factor(fraction, levels = c("respiration", "weoc", "soil")))
+    
+    make_aov_labels = function(combined_data_processed){
+      ## AOV_Y
+      aov_y = tribble(
+        ~fraction, ~name, ~y,
+        "respiration", "C_mg_g", -0.05,
+        "weoc", "C_mg_g", 0,
+        "soil", "C_mg_g", 25
+      )
+      
+      ## AOV
+      make_control = function(combined_data_processed){
+        dat_control = combined_data_processed %>% filter(type == "control") %>% mutate(type2 = "CONTROL")
+        dat1 = dat_control %>% mutate(type = "sorbed-C", treatment = "1-time-zero")
+        dat2 = dat_control %>% mutate(type = "sorbed-C", treatment = "2-wetting")
+        dat3 = dat_control %>% mutate(type = "sorbed-C", treatment = "3-drying")
+        dat4 = dat_control %>% mutate(type = "sorbed-C", treatment = "4-drying-rewetting")
+        
+        rbind(dat1, dat2, dat3, dat4)
+      }
+      control = make_control(combined_data_processed)
+      
+      fit_aov = function(dat){
+        # dat2 = dat %>% rbind(control)
+        a = aov(C_mg_g ~ type2, data = dat)
+        broom::tidy(a) %>% 
+          filter(term == "type2") %>% 
+          rename(p_value = `p.value`) %>% 
+          mutate(label = case_when(p_value <= 0.05 ~ "*"))
+      }
+      aov = combined_data_processed %>% 
+        filter(type == "sorbed-C") %>% 
+        mutate(type2 = "TRT") %>% rbind(control) %>% 
+        group_by(type, treatment, fraction) %>%  do(fit_aov(.))
+      
+      aov %>% left_join(aov_y)
+    }
+    aov_labels_c = make_aov_labels(combined_data_processed) %>% 
+      mutate(fraction = factor(fraction, levels = c("respiration", "weoc", "soil")))
+    
+    # third, make graph ----
+    combined_data_processed %>% 
+      mutate(fraction = factor(fraction, levels = c("respiration", "weoc", "soil"))) %>% 
+      filter(!type %in% c("control")) %>% 
+      ggplot(aes(x = treatment, y = C_mg_g, color = type))+
+      geom_hline(data = control_summary, aes(yintercept = C_mg_g), linetype = "dashed", color = "grey30")+
+      geom_point(size = 3, show.legend = FALSE) +
+      geom_text(data = hsd_labels_c %>% filter(type == "sorbed-C"), aes(label = label, y = y), color = "black")+
+      geom_text(data = aov_labels_c %>% filter(type == "sorbed-C"), aes(label = label, y = y), color = "black", size = 6)+
+      #scale_color_manual(values = pnw_palette("Sailboat", 3))+
+      scale_color_manual(values = c(NA, "#e89c81"))+
+      scale_x_discrete(labels = c("T0", "W", "D", "DW"))+
+      labs(title = "C (mg/g)",
+           #caption = "dashed line = avg of control samples",
+           x = "",
+           y = "")+
+      facet_grid(fraction~., scales = "free_y")+
+      theme_kp()+
+      theme(panel.grid.minor = element_blank(),
+            #strip.text.y = element_blank()
+            )+
+      NULL
+  }
+  gg_desorp_c = make_graphs_desorption_c(combined_data_processed)
+  
+  gg_desorp_c + gg_desorp_d13c + plot_annotation(caption = "dashed line = avg of control samples") 
+}
 
+make_graphs_priming = function(combined_data_processed){
+  make_graphs_priming_d13c = function(combined_data_processed){
+    # first, calculate mean values for control soils. use this in the graphs ----
+    control_summary = 
+      combined_data_processed %>% 
+      filter(type %in% c("control")) %>% 
+      group_by(fraction) %>% 
+      dplyr::summarise(d13C_VPDB = mean(d13C_VPDB)) %>% 
+      mutate(fraction = factor(fraction, levels = c("respiration", "weoc", "soil")))
+    
+    # second, prepare graph labels ----
+    make_hsd_labels = function(combined_data_processed){
+      # a. set y-axis values
+      desorption_label_y = tribble(
+        ~analysis, ~fraction, ~name, ~y,
+        "HSD",  "respiration", "d13C_VPDB", 2100,
+        "HSD",  "weoc", "d13C_VPDB", 30,
+        "HSD",  "soil", "d13C_VPDB", -10
+      )
+      
+      # b. then, calculate HSD for labels 
+      compute_hsd_desorption = function(combined_data_processed){
+        fit_hsd = function(dat){
+          a = aov(d13C_VPDB ~ treatment, data = dat)
+          h = HSD.test(a, "treatment")
+          h$groups %>% mutate(treatment = row.names(.)) %>% 
+            rename(label = groups) %>%  
+            dplyr::select(treatment, label)
+        }
+        
+        combined_data_processed %>% 
+          filter(type == "solution-C") %>% 
+          dplyr::select(core, type, treatment, fraction, d13C_VPDB) %>% 
+          #          pivot_longer(-c(core, type, treatment, fraction)) %>% 
+          group_by(type, fraction) %>% 
+          do(fit_hsd(.)) # %>% pivot_wider(names_from = "name", values_from = "label")
+      }
+      desorption_hsd_label = compute_hsd_desorption(combined_data_processed) %>% 
+        mutate(fraction = factor(fraction, levels = c("respiration", "weoc", "soil")))
+      
+      
+      # c. then, merge the labels with the y
+      desorption_hsd_label %>% left_join(desorption_label_y) %>% 
+        mutate(fraction = factor(fraction, levels = c("respiration", "weoc", "soil")))
+    }
+    hsd_labels_d13c = make_hsd_labels(combined_data_processed)
+    
+    make_aov_labels = function(combined_data_processed){
+      ## AOV_Y
+      aov_y = tribble(
+        ~fraction, ~name, ~y,
+        "respiration", "d13C_VPDB", -300,
+        "weoc", "d13C_VPDB", -40,
+        "soil", "d13C_VPDB", -35
+      )
+      
+      ## AOV
+      make_control = function(combined_data_processed){
+        dat_control = combined_data_processed %>% filter(type == "control") %>% mutate(type2 = "CONTROL")
+        dat1 = dat_control %>% mutate(type = "solution-C", treatment = "1-time-zero")
+        dat2 = dat_control %>% mutate(type = "solution-C", treatment = "2-wetting")
+        
+        rbind(dat1, dat2)
+      }
+      control = make_control(combined_data_processed)
+      
+      fit_aov = function(dat){
+        #    dat2 = dat %>% rbind(control)
+        a = aov(d13C_VPDB ~ type2, data = dat)
+        broom::tidy(a) %>% 
+          filter(term == "type2") %>% 
+          rename(p_value = `p.value`) %>% 
+          mutate(label = case_when(p_value <= 0.05 ~ "*"))
+      }
+      aov = combined_data_processed %>% 
+        filter(type == "solution-C") %>% 
+        mutate(type2 = "TRT") %>% rbind(control) %>% 
+        group_by(type, treatment, fraction) %>%  #dplyr::summarise(n = n())
+        do(fit_aov(.))
+      
+      aov %>% left_join(aov_y)
+    }
+    aov_labels_d13c = make_aov_labels(combined_data_processed) %>% 
+      mutate(fraction = factor(fraction, levels = c("respiration", "weoc", "soil")))
+    
+    # third, make graphs ----
+    combined_data_processed %>% 
+      mutate(fraction = factor(fraction, levels = c("respiration", "weoc", "soil"))) %>% 
+      # filter(type %in% c("solution-C")) %>% 
+      filter(!type %in% c("control")) %>% 
+      ggplot(aes(x = treatment, y = d13C_VPDB, color = type))+
+      geom_hline(data = control_summary, aes(yintercept = d13C_VPDB), linetype = "dashed", color = "grey30")+
+      geom_point(size = 3, show.legend = FALSE) +
+      geom_text(data = hsd_labels_d13c %>% filter(type == "solution-C"), aes(label = label, y = y), color = "black")+
+      geom_text(data = aov_labels_d13c %>% filter(type == "solution-C"), aes(label = label, y = y), color = "black", size = 6)+
+      #scale_color_manual(values = pnw_palette("Sailboat", 3))+
+      scale_color_manual(values = c("#6e7cb9", NA))+
+      #scale_x_discrete(labels = c("T0", "+C"))+
+      scale_x_discrete(limits = c("1-time-zero", "2-wetting"),
+                       breaks = c("1-time-zero", "2-wetting"),
+                       labels = c("T0", "+C"))+
+      labs(title = "δ13C (‰)",
+           #caption = "dashed line = avg of control samples",
+           x = "",
+           y = "")+
+      facet_grid(fraction~., scales = "free_y")+
+      theme_kp()+
+      theme(panel.grid.minor = element_blank(),
+            strip.text.y = element_blank())+
+      NULL
+  }
+  gg_priming_d13c = make_graphs_priming_d13c(combined_data_processed)
+  
+  make_graphs_priming_c = function(combined_data_processed){
+    # first, calculate mean values for control soils. use this in the graphs ----
+    control_summary = 
+      combined_data_processed %>% 
+      filter(type %in% c("control")) %>% 
+      group_by(fraction) %>% 
+      dplyr::summarise(C_mg_g = mean(C_mg_g)) %>% 
+      mutate(fraction = factor(fraction, levels = c("respiration", "weoc", "soil")))
+    
+    # second, prepare graph labels ----
+    make_hsd_labels = function(combined_data_processed){
+      # a. set y-axis values
+      desorption_label_y = tribble(
+        ~analysis, ~fraction, ~name, ~y,
+        "HSD",  "respiration", "C_mg_g", 0.15,
+        "HSD",  "weoc", "C_mg_g", 0.15,
+        "HSD",  "soil", "C_mg_g", 35
+      )
+      
+      # b. then, calculate HSD for labels 
+      compute_hsd_desorption = function(combined_data_processed){
+        fit_hsd = function(dat){
+          a = aov(C_mg_g ~ treatment, data = dat)
+          h = HSD.test(a, "treatment")
+          h$groups %>% mutate(treatment = row.names(.)) %>% 
+            rename(label = groups) %>%  
+            dplyr::select(treatment, label)
+        }
+        
+        combined_data_processed %>% 
+          filter(type == "solution-C") %>% 
+          dplyr::select(core, type, treatment, fraction, C_mg_g) %>% 
+          #pivot_longer(-c(core, type, treatment, fraction)) %>% 
+          group_by(type, fraction) %>% 
+          do(fit_hsd(.)) # %>% pivot_wider(names_from = "name", values_from = "label")
+      }
+      desorption_hsd_label = compute_hsd_desorption(combined_data_processed) %>% 
+        mutate(fraction = factor(fraction, levels = c("respiration", "weoc", "soil")))
+      
+      # c. then, merge the labels with the y
+      desorption_hsd_label %>% left_join(desorption_label_y) %>% 
+        mutate(fraction = factor(fraction, levels = c("respiration", "weoc", "soil")))
+    }
+    hsd_labels_c = make_hsd_labels(combined_data_processed) %>% 
+      mutate(fraction = factor(fraction, levels = c("respiration", "weoc", "soil")))
+    
+    make_aov_labels = function(combined_data_processed){
+      ## AOV_Y
+      aov_y = tribble(
+        ~fraction, ~name, ~y,
+        "respiration", "C_mg_g", -0.05,
+        "weoc", "C_mg_g", 0,
+        "soil", "C_mg_g", 25
+      )
+      
+      ## AOV
+      make_control = function(combined_data_processed){
+        dat_control = combined_data_processed %>% filter(type == "control") %>% mutate(type2 = "CONTROL")
+        dat1 = dat_control %>% mutate(type = "solution-C", treatment = "1-time-zero")
+        dat2 = dat_control %>% mutate(type = "solution-C", treatment = "2-wetting")
+        
+        rbind(dat1, dat2)
+      }
+      control = make_control(combined_data_processed)
+      
+      fit_aov = function(dat){
+        # dat2 = dat %>% rbind(control)
+        a = aov(C_mg_g ~ type2, data = dat)
+        broom::tidy(a) %>% 
+          filter(term == "type2") %>% 
+          rename(p_value = `p.value`) %>% 
+          mutate(label = case_when(p_value <= 0.05 ~ "*"))
+      }
+      aov = combined_data_processed %>% 
+        filter(type == "solution-C") %>% 
+        mutate(type2 = "TRT") %>% rbind(control) %>% 
+        group_by(type, treatment, fraction) %>%  do(fit_aov(.))
+      
+      aov %>% left_join(aov_y)
+    }
+    aov_labels_c = make_aov_labels(combined_data_processed) %>% 
+      mutate(fraction = factor(fraction, levels = c("respiration", "weoc", "soil")))
+    
+    # 2b, add empty labels for y axis spacing ----
+    empty_label_y = tribble(
+      ~analysis, ~fraction, ~name, ~y, ~label,
+      "empty",  "respiration", "C_mg_g", 0.15, " ",
+      "empty",  "respiration", "C_mg_g", -0.05, " ",
+      "empty",  "weoc", "C_mg_g", 0.15, " ",
+      "empty",  "weoc", "C_mg_g", 0, " ",
+      "empty",  "soil", "C_mg_g", 35, " ",
+      "empty",  "soil", "C_mg_g", 25, " "
+    ) %>% 
+      mutate(fraction = factor(fraction, levels = c("respiration", "weoc", "soil")))
+    
+    
+    # third, make graph ----
+    combined_data_processed %>% 
+      mutate(fraction = factor(fraction, levels = c("respiration", "weoc", "soil"))) %>% 
+      #filter(type %in% c("solution-C")) %>% 
+      filter(!type %in% "control") %>% 
+      ggplot(aes(x = treatment, y = C_mg_g, color = type))+
+      geom_hline(data = control_summary, aes(yintercept = C_mg_g), linetype = "dashed", color = "grey30")+
+      geom_point(size = 3, show.legend = FALSE) +
+      geom_text(data = hsd_labels_c %>% filter(type == "sorbed-C"), aes(label = label, y = y), color = "black")+
+      geom_text(data = aov_labels_c %>% filter(type == "sorbed-C"), aes(label = label, y = y), color = "black", size = 6)+
+      geom_text(data = empty_label_y, aes(label = label, y = y, x = 1.5), color = NA)+
+      #scale_color_manual(values = pnw_palette("Sailboat", 3))+
+      scale_color_manual(values = c("#6e7cb9", NA))+
+      #scale_x_discrete(labels = c("T0", "W", "D", "DW"))+
+      scale_x_discrete(limits = c("1-time-zero", "2-wetting"),
+                       breaks = c("1-time-zero", "2-wetting"),
+                       labels = c("T0", "+C"))+
+      labs(title = "C (mg/g)",
+           #caption = "dashed line = avg of control samples",
+           x = "",
+           y = "")+
+      facet_grid(fraction~., scales = "free_y")+
+      theme_kp()+
+      theme(panel.grid.minor = element_blank(),
+            #strip.text.y = element_blank()
+            )+
+      NULL
+  }
+  gg_priming_c = make_graphs_priming_c(combined_data_processed)
+  
+  gg_priming_c + gg_priming_d13c + plot_annotation(caption = "dashed line = avg of control samples") 
+}
 
 calculate_mass_balance = function(combined_data_processed){
   ## 13C stacked plots
@@ -582,38 +1047,48 @@ calculate_mass_balance = function(combined_data_processed){
     group_by(treatment, type, fraction) %>% 
     dplyr::summarise(C_mg_g = mean(C_mg_g),
                      C13_mg_g = mean(C13_mg_g),
-                     C13_mg_g = round(C13_mg_g,3))
+                     C13_mg_g = round(C13_mg_g,3)) %>% 
+    dplyr::select(-fraction)
   
   gg_massbalance_desorp = 
     combined_data_processed_summary %>% 
     filter(fraction != "soil" & type != "solution-C") %>% 
-    ggplot(aes(x = treatment, y = C13_mg_g*1000, fill = fraction))+
-    geom_bar(stat = "identity")+
+    ggplot(aes(x = treatment, y = C13_mg_g*1000))+
+    geom_bar(aes(fill = fraction, color = fraction), stat = "identity", position = position_dodge(width = 0.7), width = 0.5, alpha = 0.7, size = 0.7)+
     geom_text(data = label %>%  filter(type != "solution-C"), aes(y = 2.95, label = C13_mg_g*1000))+
     annotate("text", label = "total 13C in soil (μg/g):", x = 0.7, y = 3.10, hjust = 0)+
+    labs(x = "", y = "13C (μg/g)")+
+    scale_x_discrete(labels = c("T0", "W", "D", "DW"))+
+    #scale_fill_manual(values = pnw_palette("Sunset", 3))+
+    scale_fill_manual(values = soilpalettes::soil_palette("redox2", 3))+
+    scale_color_manual(values = soilpalettes::soil_palette("redox2", 3))+
     facet_wrap(~type)+
     theme_kp()+
-    theme(axis.text.x = element_text(angle = 45))+
+    #theme(axis.text.x = element_text(angle = 45))+
     NULL
 
   gg_massbalance_priming = 
     combined_data_processed_summary %>% 
     filter(fraction != "soil" & type == "solution-C") %>% 
-    ggplot(aes(x = treatment, y = C13_mg_g*1000, fill = fraction))+
-    geom_bar(stat = "identity")+
+    ggplot(aes(x = treatment, y = C13_mg_g*1000))+
+    geom_bar(aes(fill = fraction, color = fraction), stat = "identity", position = position_dodge(width = 0.7), width = 0.5, alpha = 0.7, size = 0.7)+
     geom_text(data = label %>%  filter(type == "solution-C"), aes(y = 2.95, label = C13_mg_g*1000))+
     annotate("text", label = "total 13C in soil (μg/g):", x = 0.7, y = 3.10, hjust = 0)+
+    labs(x = "", y = "13C (μg/g)")+
+    scale_fill_manual(values = soilpalettes::soil_palette("redox2", 3))+
+    scale_color_manual(values = soilpalettes::soil_palette("redox2", 3))+
+    scale_x_discrete(labels = c("T0", "+C"))+
     facet_wrap(~type)+
     theme_kp()+
-    theme(axis.text.x = element_text(angle = 45))+
+    #theme(axis.text.x = element_text(angle = 45))+
     NULL
   
   
   gg_mass_balance_soilc = 
     combined_data_processed_summary %>% 
     filter(fraction != "soil") %>% 
-    ggplot(aes(x = treatment, y = C_mg_g, fill = fraction))+
-    geom_bar(stat = "identity")+
+    ggplot(aes(x = treatment, y = C_mg_g))+
+    geom_bar(aes(fill = fraction), stat = "identity")+
     geom_text(data = label, aes(y = 0.25, label = C_mg_g))+
       annotate("text", label = "total C in soil (mg/g):", x = 0.7, y = 0.28, hjust = 0)+
       facet_wrap(~type)+
@@ -662,8 +1137,13 @@ calculate_clay_effect = function(combined_data_processed){
   gg_tzero_d13c = 
     clay %>% 
     ggplot(aes(x = type, y = d13C_VPDB, color = type))+
-    geom_point(size = 3, show.legend = FALSE)+
+    geom_point(aes(shape = type), size = 3, stroke = 1, show.legend = F, color = "black")+
     geom_text(data = tzero_label, aes(x = 1.5, y = d13C_y, label = d13C_VPDB), color = "black", size = 7)+  
+    labs(title = "δ13C (‰)",
+         x = "", y = "")+
+    scale_x_discrete(labels = c("control", "+ clay"))+
+    #scale_color_manual(values = c("purple", "yellow"))+
+    scale_shape_manual(values = c(1, 19))+
     facet_grid(fraction~., scales = "free_y")+
     theme_kp()+
     NULL
@@ -671,16 +1151,45 @@ calculate_clay_effect = function(combined_data_processed){
   gg_tzero_c = 
     clay %>% 
     ggplot(aes(x = type, y = C_mg_g, color = type))+
-    geom_point(size = 3, show.legend = FALSE)+
-    geom_text(data = tzero_label, aes(x = 1.5, y = C_y, label = C_mg_g), color = "black", size = 7)+  
-    facet_grid(fraction~., scales = "free_y")+
+      geom_point(aes(shape = type), size = 3, stroke = 1, show.legend = F, color = "black")+
+      geom_text(data = tzero_label, aes(x = 1.5, y = C_y, label = C_mg_g), color = "black", size = 7)+  
+      labs(title = "C (mg/g)",
+           x = "", y = "")+
+      scale_x_discrete(labels = c("control", "+ clay"))+
+      #scale_color_manual(values = c("purple", "yellow"))+
+      scale_shape_manual(values = c(1, 19))+
+      facet_grid(fraction~., scales = "free_y")+
     theme_kp()+
+      theme(strip.text.y = element_blank())+
     NULL
   
-  list(gg_tzero_d13c = gg_tzero_d13c,
-       gg_tzero_c  =gg_tzero_c)
+  
+  gg_tzero_c + gg_tzero_d13c 
+
 }
 
+calculate_recovery = function(){
+  
+  compute_priming_recovery = function(){
+    combined_data_processed %>% 
+      filter(type == "solution-C" & fraction %in% c("respiration", "soil")) %>% 
+      group_by(core, treatment) %>% 
+      dplyr::summarise(C13_mg_g = sum(C13_mg_g)) %>% 
+      group_by(treatment) %>% 
+      dplyr::summarise(C13_ug_g = mean(C13_mg_g*1000))
+    
+    
+    combined_data_processed %>% 
+      filter(type == "solution-C" & fraction %in% c("respiration", "soil")) %>% 
+      group_by(treatment, fraction) %>% 
+      dplyr::summarise(C13_ug_g = mean(C13_mg_g*1000))
+  }
+  
+  
+  
+  
+  
+}
 
 # mixing model for respiration --------------------------------------------
 
@@ -707,31 +1216,7 @@ summary(aov(D13C_calc ~ treatment,
 
 
 # -------------------------------------------------------------------------
-# LABELS -- IGNORE -------------------------------------------------------------------------
 
-
-
-##    combined_label = tribble(
-##      ~type, ~treatment, ~fraction, ~d13C_VPDB, ~C_mg_g, ~label,
-##      "sorbed-C", "1-time-zero", "respiration", 100, NA, "a",
-##      "sorbed-C", "2-wetting", "respiration", 100, NA, "ab",
-##      "sorbed-C", "3-drying", "respiration", 100, NA, "c",
-##      "sorbed-C", "4-drying-rewetting", "respiration", 100, NA, "b",
-##      
-##      "sorbed-C", "1-time-zero", "respiration", NA, 0.03, "a",
-##      "sorbed-C", "2-wetting", "respiration", NA, 0.03, "b",
-##      "sorbed-C", "3-drying", "respiration", NA, 0.03, "c",
-##      "sorbed-C", "4-drying-rewetting", "respiration", NA, 0.03, "a"
-##      
-##      #  "sorbed-C", "1-time-zero", "weoc", 
-##      #  "sorbed-C", "2-wetting", "weoc", 
-##      #  "sorbed-C", "3-drying", "weoc", 
-##      #  "sorbed-C", "4-drying-rewetting", "weoc", 
-##      
-##      
-##      
-##    ) %>% 
-##      mutate(fraction = factor(fraction, levels = c("respiration", "weoc", "soil")))
 
 # -------------------------------------------------------------------------
 
