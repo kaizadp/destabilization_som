@@ -34,9 +34,9 @@ analysis_plan = drake_plan(
   
   # report 
   report = rmarkdown::render(
-    knitr_in("reports/destab_slides.Rmd") #, output_format = rmarkdown::pdf_document()
+    knitr_in("reports/destab_slides_v2.Rmd") #, output_format = rmarkdown::pdf_document()
     ),
-  #pagedown::chrome_print("reports/destab_slides.html", "reports/destab_slides_2021-01-28.pdf")
+  #pagedown::chrome_print("reports/destab_slides.html", "reports/destab_slides_2021-01-29.pdf")
   
 )
 
