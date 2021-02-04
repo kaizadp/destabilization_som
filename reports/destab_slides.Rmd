@@ -52,6 +52,7 @@ To partition biochemical and physicochemical protection/destabilization mechanis
   - under conditions of drying, desorption of C from clay-sorbed substrate will result in [lag and release] of desorption/respiration. vs. cell lysis means we will have a pulse of more 12C vs. the newly added 13C
 1. drying will have a stronger effect on soil C destabilization, compared to wetting
   - drying will have a higher ratio of 13/12C because the respiration will be more destabilization vs. wetting/access to native soil C. 
+  - more 13C in DW
 
 
 ---
@@ -320,7 +321,6 @@ T0 = goethite mixed with soil
 
 
 - respiration, WEOC, and soil were all enriched after addition of soluble 13C-oxalic acid
-- CHECK T0 ENRICHMENT STATS
 
 - respiration: more enriched from solution-C (1648 ‰) compared to sorbed-C (586 ‰) 
   - OA was more available in solution form than in adsorbed form
