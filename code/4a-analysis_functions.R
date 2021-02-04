@@ -697,7 +697,7 @@ make_graphs_desorption = function(combined_data_processed){
         ~analysis, ~fraction, ~name, ~y,
         "HSD",  "respiration", "C_mg_g", 0.15,
         "HSD",  "weoc", "C_mg_g", 0.15,
-        "HSD",  "soil", "C_mg_g", 35
+        "HSD",  "soil", "C_mg_g", 32
       )
       
       # b. then, calculate HSD for labels 
@@ -731,7 +731,7 @@ make_graphs_desorption = function(combined_data_processed){
       ## AOV_Y
       aov_y = tribble(
         ~fraction, ~name, ~y,
-        "respiration", "C_mg_g", -0.05,
+        "respiration", "C_mg_g", -0.02,
         "weoc", "C_mg_g", 0,
         "soil", "C_mg_g", 25
       )
@@ -805,7 +805,7 @@ make_graphs_desorption = function(combined_data_processed){
       # a. set y-axis values
       desorption_label_y = tribble(
         ~analysis, ~fraction, ~name, ~y,
-        "HSD",  "respiration", "C13_mg_g", 2.5,
+        "HSD",  "respiration", "C13_mg_g", 3.5,
         "HSD",  "weoc", "C13_mg_g", 1.5,
         "HSD",  "soil", "C13_mg_g", 400
       )
@@ -1067,7 +1067,7 @@ make_graphs_priming = function(combined_data_processed){
       ## AOV_Y
       aov_y = tribble(
         ~fraction, ~name, ~y,
-        "respiration", "C_mg_g", 0,
+        "respiration", "C_mg_g", -0.02,
         "weoc", "C_mg_g", 0,
         "soil", "C_mg_g", 25
       )
@@ -1104,7 +1104,7 @@ make_graphs_priming = function(combined_data_processed){
     empty_label_y = tribble(
       ~analysis, ~fraction, ~name, ~y, ~label,
       "empty",  "respiration", "C_mg_g", 0.15, " ",
-      "empty",  "respiration", "C_mg_g", 0, " ",
+      "empty",  "respiration", "C_mg_g", -0.02, " ",
       "empty",  "weoc", "C_mg_g", 0.15, " ",
       "empty",  "weoc", "C_mg_g", 0, " ",
       "empty",  "soil", "C_mg_g", 32, " ",
@@ -1157,7 +1157,7 @@ make_graphs_priming = function(combined_data_processed){
       # a. set y-axis values
       desorption_label_y = tribble(
         ~analysis, ~fraction, ~name, ~y,
-        "HSD",  "respiration", "C13_mg_g", 4,
+        "HSD",  "respiration", "C13_mg_g", 3.5,
         "HSD",  "weoc", "C13_mg_g", 1.5,
         "HSD",  "soil", "C13_mg_g", 400
       )
@@ -1193,7 +1193,7 @@ make_graphs_priming = function(combined_data_processed){
       ## AOV_Y
       aov_y = tribble(
         ~fraction, ~name, ~y,
-        "respiration", "C13_mg_g", 0,
+        "respiration", "C13_mg_g", -0.5,
         "weoc", "C13_mg_g", 0,
         "soil", "C13_mg_g", 250
       )

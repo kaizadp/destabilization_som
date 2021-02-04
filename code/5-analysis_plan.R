@@ -1,4 +1,4 @@
-core_weights = read.csv("data/processed/core_weights.csv") %>% mutate(core = as.character(core))
+#core_weights = read.csv("data/processed/core_weights.csv") %>% mutate(core = as.character(core))
 
 
 source("code/4a-analysis_functions.R")
@@ -36,7 +36,7 @@ analysis_plan = drake_plan(
   report = rmarkdown::render(
     knitr_in("reports/destab_slides_v2.Rmd") #, output_format = rmarkdown::pdf_document()
     ),
-  #pagedown::chrome_print("reports/destab_slides.html", "reports/destab_slides_2021-01-29.pdf")
+  #pagedown::chrome_print("reports/destab_slides_v2.html", "reports/destab_slides_2021-02-03.pdf")
   
 )
 
