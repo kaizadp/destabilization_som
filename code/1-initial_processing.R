@@ -101,3 +101,13 @@ weoc_subsampling = read_sheet("1A8CXukZSxYb3Hpc-XEea2RPvabO2hzvBSimyQT0gu1w", sh
 weoc_capsuleweights = read_sheet("1pTg_Q2_jsQoYxmXZbUqDxTv4VTENCBemcsMeGDovkAs", sheet = "all_weights") %>% 
   mutate(core = as.numeric(as.character(core))) %>% 
   write.csv(WEOC_CAPSULES, row.names = F, na = "")
+
+
+## 4. picarro respiration glucose response ---------------------------------
+# corekey
+read_sheet("1Tcj9aKXFAOWWIKWNtnLgzasGM2Bsu5E6Faru3ag-3QY") %>% 
+  write.csv("data/picarro_corekey.csv", row.names = F, na = "")
+
+# valvekey
+read_sheet("1xbobt7dtvtP0iEkjPknXSD2brracJKvlgiz1N9JGl6Q") %>% 
+  write.csv("data/picarro_valvekey.csv", row.names = F, na = "")
