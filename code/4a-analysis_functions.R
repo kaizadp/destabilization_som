@@ -1528,3 +1528,212 @@ summary(aov(D13C_calc ~ treatment,
 ##          
 
 
+
+
+
+###############
+###############
+# combine sorption and solution C -----------------------------------------
+
+plot_sorbed_and_solution = function(combined_data_processed){
+  reorder_factors = function(dat){
+    dat %>% 
+      mutate(fraction = factor(fraction, levels = c("respiration", "weoc", "soil")),
+             type = factor(type, levels = c("control", "sorbed-C", "solution-C")))
+  }
+  
+  ## make a subset with only the pieces needed
+  combined_data2 = 
+    combined_data_processed %>% 
+    filter(treatment == "2-wetting") %>% 
+    mutate(C13_ug_g = C13_mg_g * 1000) %>% 
+    dplyr::select(core, type, treatment, fraction, C_mg_g, d13C_VPDB, C13_ug_g) %>% 
+    reorder_factors(.)
+  
+
+  
+  ## do stats for label
+  make_hsd_labels = function(combined_data2){
+    # a. make longform
+    combined_data2_longform = 
+      combined_data2 %>% 
+      pivot_longer(-c(core, type, treatment, fraction), names_to = "variable", values_to = "value") %>% 
+      force()
+    
+    # a. set y-axis values
+    label_y = tribble(
+      ~analysis, ~fraction, ~variable, ~y,
+      "HSD",  "respiration", "d13C_VPDB", 2100,
+      "HSD",  "weoc", "d13C_VPDB", 30,
+      "HSD",  "soil", "d13C_VPDB", -20,
+      
+      "HSD",  "respiration", "C_mg_g", 0.154,
+      "HSD",  "weoc", "C_mg_g", 0.15,
+      "HSD",  "soil", "C_mg_g", 34,
+      
+      "HSD",  "respiration", "C13_ug_g", 3.5,
+      "HSD",  "weoc", "C13_ug_g", 1.5,
+      "HSD",  "soil", "C13_ug_g", 360,
+      
+    )
+    
+    # b. then, calculate HSD for labels 
+    fit_hsd = function(dat){
+      a = aov(value ~ type, data = dat)
+      h = HSD.test(a, "type")
+      h$groups %>% mutate(type = row.names(.)) %>% 
+        rename(label = groups) %>%  
+        dplyr::select(type, label)
+    }
+    
+    hsd_label = 
+      combined_data2_longform %>% 
+      group_by(treatment, fraction, variable) %>% 
+      do(fit_hsd(.)) # %>% pivot_wider(names_from = "variable", values_from = "label")
+    
+    # c. then, merge the labels with the y
+    hsd_label %>% left_join(label_y) %>% 
+      mutate(fraction = factor(fraction, levels = c("respiration", "weoc", "soil"))) %>% 
+      reorder_factors(.)
+      
+  }
+  hsd_labels = make_hsd_labels(combined_data2)
+  
+  ## make plots
+  make_plots = function(combined_data2){
+    
+    plot_d13c = 
+      combined_data2 %>% 
+      ggplot(aes(x = type, y = d13C_VPDB))+
+      geom_point(#aes(color = type), 
+                 size = 3)+
+      geom_text(data = hsd_labels %>% filter(variable == "d13C_VPDB"), aes(y = y, label = label))+
+      facet_grid(fraction ~., scales = "free_y")+
+      labs(x = "", y = "",
+           title = "δ13C, \u2030")+
+      theme_kp()+
+      theme(legend.position = "none")+
+      NULL
+    
+    plot_c = 
+      combined_data2 %>% 
+      ggplot(aes(x = type, y = C_mg_g))+
+      geom_point(#aes(color = type), 
+                 size = 3)+
+      geom_text(data = hsd_labels %>% filter(variable == "C_mg_g"), aes(y = y, label = label))+
+      facet_grid(fraction ~., scales = "free_y")+
+      labs(x = "", y = "",
+           title = "C, mg/g")+
+      theme_kp()+
+      theme(legend.position = "none")+
+      NULL
+      
+    plot_c13 = 
+      combined_data2 %>% 
+      ggplot(aes(x = type, y = C13_ug_g))+
+      geom_point(#aes(color = type), 
+                 size = 3)+
+      geom_text(data = hsd_labels %>% filter(variable == "C13_ug_g"), aes(y = y, label = label))+
+      facet_grid(fraction ~., scales = "free_y")+
+      labs(x = "", y = "",
+           title = "C13, μg/g")+
+      theme_kp()+
+      theme(legend.position = "none")+
+      NULL
+      
+    plot_c + plot_d13c + plot_c13
+    
+  }
+  make_plots(combined_data2)
+}
+plot_sorbed_and_solution(combined_data_processed)
+
+
+plot_mass_balance_sorbed_and_solution = function(combined_data_processed){
+  ## first, subset only the necessary data
+  combined_data2 = 
+    combined_data_processed %>% 
+    filter(treatment == "2-wetting") %>% 
+    mutate(C13_ug_g = C13_mg_g * 1000) %>% 
+    dplyr::select(core, type, treatment, fraction, C_mg_g, d13C_VPDB, C13_ug_g) %>% 
+    reorder_factors(.)
+  
+  ## prepare summary
+  combined_data2_summary = 
+    combined_data2 %>%
+    filter(fraction != "weoc") %>% 
+    group_by(core) %>% 
+    group_by(treatment, type, fraction) %>%
+    dplyr::summarise(C_mg_g = mean(C_mg_g),
+                     C13_ug_g = mean(C13_ug_g)) %>%
+    mutate(across(where(is.numeric), round, 2))
+  
+  ## prepare labels
+  mass_balance_label = 
+    combined_data2_summary %>% 
+    mutate(y_ug = case_when(fraction == "respiration" ~ 355,
+                            fraction == "soil" ~ 200),
+           label_ug = paste(fraction, "\n", C13_ug_g),
+           y_mg = case_when(fraction == "respiration" ~ 33,
+                            fraction == "soil" ~ 15),
+           label_mg = paste(fraction, "\n", C_mg_g))
+  
+  mass_balance_label_total = 
+    combined_data2_summary %>%
+    group_by(treatment, type) %>% 
+    dplyr::summarise(total_C = sum(C_mg_g),
+                     total_C13 = sum(C13_ug_g)) %>% 
+    mutate(label_C = paste("total:", total_C, "mg/g"),
+           label_C13 = paste("total:", total_C13, "μg/g"))
+  
+  mass_balance_tukey_label =
+    tribble(
+      ~x, ~y, ~label,
+      "control", 330, "(b)",
+      "sorbed-C", 330, "(b)",
+      "solution-C", 330, "(a)",
+      
+      "control", 180, "(A)",
+      "sorbed-C", 180, "(B)",
+      "solution-C", 180, "(B)",
+    )
+  ## make plots
+  massbalance_c13 = 
+    combined_data2_summary %>% 
+    filter(fraction != "weoc") %>% 
+    ggplot(aes(x = type, y = C13_ug_g))+
+    geom_bar(aes(fill = fraction, color = fraction), 
+             stat = "identity", #position = position_dodge(width = 0.7), 
+             width = 0.5, alpha = 0.7, size = 0.7)+
+    geom_text(data = mass_balance_label, aes(y = y_ug, label = label_ug))+
+    geom_text(data = mass_balance_label_total, aes(y = 2, label = label_C13),
+              nudge_x = -0.32, angle = 90, hjust = 0)+
+    geom_text(data = mass_balance_tukey_label, aes(x = x, y = y, label = label))+
+    labs(x = "", y = "13C (μg/g)",
+         caption = "sorbed-C: 7.72 μg/g 13C added \n solution-C: 6.02 μg/g 13C added")+
+    scale_fill_manual(values = soilpalettes::soil_palette("redox2", 3))+
+    scale_color_manual(values = soilpalettes::soil_palette("redox2", 3))+
+    theme_kp()+
+    NULL
+  
+  massbalance_c = 
+    combined_data2_summary %>% 
+    filter(fraction != "weoc") %>% 
+    ggplot(aes(x = type, y = C_mg_g))+
+    geom_bar(aes(fill = fraction, color = fraction), 
+             stat = "identity", #position = position_dodge(width = 0.7), 
+             width = 0.5, alpha = 0.7, size = 0.7)+
+    geom_text(data = mass_balance_label, aes(y = y_mg, label = label_mg))+
+    geom_text(data = mass_balance_label_total, aes(y = 2, label = label_C),
+              nudge_x = -0.32, angle = 90, hjust = 0)+
+    labs(x = "", y = "C (mg/g)",
+         caption = "sorbed-C: 0.0125 mg/g 13C added \n solution-C: 0.04 mg/g C added")+
+    scale_fill_manual(values = soilpalettes::soil_palette("redox2", 3))+
+    scale_color_manual(values = soilpalettes::soil_palette("redox2", 3))+
+    theme_kp()+
+    NULL
+  
+  list(massbalance_c13 = massbalance_c13,
+       massbalance_c = massbalance_c)
+}
+plot_mass_balance_sorbed_and_solution(combined_data_processed)
