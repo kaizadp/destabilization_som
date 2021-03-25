@@ -320,6 +320,92 @@ process_soil_files = function(irms_soil_report, tc_soil_report, soil_traykey){
   )
 }
 
+process_weoc_pellet_files = function(irms_weoc_pellet_report, tc_weoc_pellet_report, weoc_pellet_traykey){
+  
+  # 1. IRMS --------------------------------------------------------------------
+  C_VPDB = 0.011237
+  
+  ## a. clean and get d13C values for all reps
+  vec <- rep(c("a", "b", "c"), 45)
+  irms_weoc_pellet_allreps = 
+    irms_weoc_pellet_report %>% 
+    dplyr::select(name, sample_group, d13C_VPDB) %>% 
+    filter(sample_group == "sample") %>% 
+    left_join(weoc_pellet_traykey, by = "name") %>% 
+    filter(!is.na(core)) %>% 
+    arrange(core, weoc_rep) %>% 
+    mutate(
+      rep = vec,
+      # R13C = ((d13C_VPDB/1000) + 1) * C_VPDB, R13C = round(R13C, 6)
+    ) %>% 
+    dplyr::select(core, rep, d13C_VPDB)
+  
+  ## b. make wide form with measures of variance
+  irms_weoc_pellet_cv = 
+    irms_weoc_pellet_allreps %>% 
+    dplyr::select(core, rep, d13C_VPDB) %>% 
+    group_by(core) %>% 
+    dplyr::summarise(sd = round(sd(d13C_VPDB, na.rm = TRUE), 2),
+                     cv = round(sd/mean(d13C_VPDB, na.rm = TRUE), 2),
+                     cv = abs(cv))
+  
+  irms_weoc_pellet_wide = 
+    irms_weoc_pellet_allreps %>% 
+    dplyr::select(core, rep, d13C_VPDB) %>% 
+    pivot_wider(names_from = "rep", values_from = "d13C_VPDB") %>% 
+    left_join(irms_weoc_pellet_cv, by = "core") %>% 
+    rename(d13C_A = a,
+           d13C_B = b,
+           d13C_C = c) %>% 
+    arrange(core)
+  
+  # 2. TC ----------------------------------------------------------------------
+  SLOPE_weoc_pellet = do_calibration(tc_weoc_pellet_report)$slope
+  INTERCEPT_weoc_pellet = do_calibration(tc_weoc_pellet_report)$intercept
+  
+  ## a. clean data for all reps
+  tc_weoc_pellet_allreps = 
+    tc_weoc_pellet_report %>% 
+    #filter(is.na(Memo)) %>% 
+    dplyr::select(Name, weight_mg, C_perc, Memo) %>%
+    mutate(C_mg_calc = round((C_perc/100) * weight_mg, 2)) %>% 
+    rename(totalC_perc = C_perc) %>% 
+    left_join(weoc_pellet_traykey, by = c("Name" = "name")) %>% 
+    filter(!is.na(core)) %>% 
+    mutate(rep = vec) %>% 
+    filter(Memo != "skip") %>% 
+    #mutate(core = as.character(core)) %>% 
+    dplyr::select(core, rep, weight_mg, C_mg_calc, totalC_perc)
+  
+  ## b. make wide form with cv, sd
+  tc_weoc_pellet_cv = 
+    tc_weoc_pellet_allreps %>% 
+    dplyr::select(core, rep, totalC_perc) %>% 
+    group_by(core) %>% 
+    dplyr::summarise(sd = round(sd(totalC_perc), 2),
+                     cv = round(sd/mean(totalC_perc), 2))
+  
+  #
+  # 3. combined ----------------------------------------------------------------
+  weoc_pellet_combined_allreps = 
+    left_join(tc_weoc_pellet_allreps, irms_weoc_pellet_allreps, by = c("core", "rep")) 
+  # %>% mutate(C13_mg = R13C/(1+R13C))
+  
+  weoc_pellet_combined = 
+    weoc_pellet_combined_allreps %>% 
+    group_by(core) %>% 
+    dplyr::summarise(totalC_perc = round(mean(totalC_perc), 2),
+                     totalC_mg_g = totalC_perc * 10,
+                     d13C_VPDB = round(mean(d13C_VPDB, na.rm = TRUE), 2)
+    )
+  
+  #  
+  # 4. outputs ----
+  list(irms_weoc_pellet_wide = irms_weoc_pellet_wide,
+       weoc_pellet_combined = weoc_pellet_combined
+  )
+}
+
 # PLOTTING FUNCTIONS ------------------------------------------------------
 
 plot_weoc = function(weoc_combined, core_key){

@@ -77,6 +77,11 @@ soilc_plan =
     weoc_subsampling = read.csv(file_in(WEOC_SUBSAMPLING)),
     weoc_capsuleweights = read.csv(file_in(WEOC_CAPSULES)),
     
+    # weoc pellets
+    weoc_pellet_traykey = read.csv(file_in(IRMS_WEOC_PELLETS_TRAYKEY)) %>% mutate(name = paste0("Tray", tray, "-", position)) %>% dplyr::select(name, core, weoc_rep),
+    irms_weoc_pellet_report = read.csv(file_in(IRMS_WEOC_PELLETS_REPORT)),
+    tc_weoc_pellet_report = read.csv(file_in(TC_WEOC_PELLETS_REPORT)),
+
     #
     # 2. WEOC -----------------------------------------------------------------
     ## a. process
@@ -107,7 +112,18 @@ soilc_plan =
     soil_combined %>% 
       write.csv(SOIL_PROCESSED, row.names = F),
     
+    #
+    # 4. WEOC PELLETS -----------------------------------------------------------------
+    ## a. process
+    weoc_pellet_combined = process_weoc_pellet_files(irms_weoc_pellet_report, tc_weoc_pellet_report, weoc_pellet_traykey)$weoc_pellet_combined,
+
+    ## b. plot
+
+    ## c. output
+    weoc_pellet_combined %>% 
+      write.csv(WEOC_PELLETS_PROCESSED, row.names = F),
     
+    #
     # REPORT ------------------------------------------------------------------
  #   report = rmarkdown::render(
  #     knitr_in("reports/irms_report.Rmd"),
