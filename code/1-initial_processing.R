@@ -85,6 +85,15 @@ read_sheet("1W0Gum8I-HTUu61l9_cK2RtttBCq05O1PHFDkMOt6pRE", sheet = "report") %>%
 read_sheet("1W0Gum8I-HTUu61l9_cK2RtttBCq05O1PHFDkMOt6pRE", sheet = "tray_key") %>% 
   write.csv(IRMS_WEOC_TRAYKEY, row.names = F, na = "")
 
+### irms weoc pellets
+read_sheet("1ZXgI-r0ZfziWj8kIaYJ4iYPAvii776lOH902wvb7xdk", sheet = "report") %>% 
+  mutate(d15N_air = as.numeric(paste0(d15N_air)),
+         d13C_VPDB = as.numeric(paste0(d13C_VPDB))) %>% 
+  write.csv(IRMS_WEOC_PELLETS_REPORT, row.names = F, na = "")
+
+read_sheet("1pTg_Q2_jsQoYxmXZbUqDxTv4VTENCBemcsMeGDovkAs", sheet = "doc_pellet_map") %>% 
+  write.csv(IRMS_WEOC_PELLETS_TRAYKEY, row.names = F, na = "")
+
 ### tc reports
 read_sheet("1u_WAd8dEymTWItSqIRxYw0QI-5z7m9AfK86FvNSgTrQ", sheet = "report") %>% 
   write.csv(TC_WEOC_REPORT, row.names = F, na = "")
@@ -92,6 +101,8 @@ read_sheet("1u_WAd8dEymTWItSqIRxYw0QI-5z7m9AfK86FvNSgTrQ", sheet = "report") %>%
 read_sheet("1z506tB8EaWuE98pAOwe5ZTpnXsnTfi6CnaEYz5yXnCQ", sheet = "report") %>% 
   write.csv(TC_SOIL_REPORT, row.names = F, na = "")
 
+read_sheet("1L1whxAlZwgNkvPCS3hVV665o9WWHj9VRIn2-qIfQxSs", sheet = "report") %>% 
+  write.csv(TC_WEOC_PELLETS_REPORT, row.names = F, na = "")
 
 ### weoc weights
 weoc_subsampling = read_sheet("1A8CXukZSxYb3Hpc-XEea2RPvabO2hzvBSimyQT0gu1w", sheet = "Sheet1") %>% 

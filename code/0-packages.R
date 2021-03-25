@@ -26,17 +26,21 @@ COREWEIGHTS = "data/core_weights.csv"
 ## IRMS & TOTAL C
 IRMS_SOIL_REPORT = "data/irms/irms_soil_report.csv"
 IRMS_WEOC_REPORT = "data/irms/irms_weoc_report.csv"
+IRMS_WEOC_PELLETS_REPORT = "data/irms/irms_weoc_pellets_report.csv"
 IRMS_SOIL_TRAYKEY = "data/irms/irms_soil_traykey.csv"
 IRMS_WEOC_TRAYKEY = "data/irms/irms_weoc_traykey.csv"
+IRMS_WEOC_PELLETS_TRAYKEY = "data/irms/irms_weoc_pellets_traykey.csv"
 
 TC_SOIL_REPORT = "data/irms/tc_soil_report.csv"
 TC_WEOC_REPORT = "data/irms/tc_weoc_report.csv"
+TC_WEOC_PELLETS_REPORT = "data/irms/tc_weoc_pellets_report.csv"
 
 WEOC_SUBSAMPLING = "data/irms/irms_weoc_subsampling.csv"
 WEOC_CAPSULES = "data/irms/weoc_capsuleweights.csv"
 
 SOIL_PROCESSED = "data/processed/soil_processed.csv"
 WEOC_PROCESSED = "data/processed/weoc_processed.csv"
+WEOC_PELLETS_PROCESSED = "data/processed/weoc_pellets_processed.csv"
 
 ## RESPIRATION
 RESPIRATION_PROCESSED = "data/processed/respiration_processed.csv"
