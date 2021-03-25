@@ -1612,7 +1612,8 @@ plot_sorbed_and_solution = function(combined_data_processed){
       labs(x = "", y = "",
            title = "δ13C, \u2030")+
       theme_kp()+
-      theme(legend.position = "none")+
+      theme(legend.position = "none",
+            strip.text.y = element_blank())+
       NULL
     
     plot_c = 
@@ -1626,6 +1627,7 @@ plot_sorbed_and_solution = function(combined_data_processed){
            title = "C, mg/g")+
       theme_kp()+
       theme(legend.position = "none")+
+      theme(strip.text.y = element_blank())+
       NULL
       
     plot_c13 = 
@@ -1737,3 +1739,127 @@ plot_mass_balance_sorbed_and_solution = function(combined_data_processed){
        massbalance_c = massbalance_c)
 }
 plot_mass_balance_sorbed_and_solution(combined_data_processed)
+
+
+###############
+###############
+
+# test for soil C heterogeneity -------------------------------------------
+
+het_soil_irms = read.csv("data/irms/irms_soil_heterogeneity_2021-02-25.csv", na.strings = "")
+het_soil_tc = read.csv("data/irms/tc_soil_heterogeneity_2021-02-25.csv", na.strings = "")
+core_key = read.csv(("data/core_key.csv")) %>% mutate(core = as.character(core)) %>% filter(is.na(skip)) %>% 
+  dplyr::select(core, type, treatment)
+
+process_heterogeneity_data = function(het_soil_tc, het_soil_irms){
+  
+  # initial cleaning
+  tc = 
+    het_soil_tc %>% 
+    filter(sample_type == "sample") %>% 
+    dplyr::select(Name, C_perc) %>% 
+    rename(name = Name)
+  
+  irms = 
+    het_soil_irms %>% 
+    filter(sample_group == "sample") %>% 
+    dplyr::select(name, d13C_VPDB)
+  
+  # combine
+  R13C_VPDB = 0.011237
+  
+  combined = 
+    left_join(tc, irms, by = "name") %>% 
+    filter(!grepl("-rep", name)) %>% 
+    mutate(core = as.character(parse_number(name))) %>% 
+    dplyr::select(name, core, C_perc, d13C_VPDB) %>% 
+    left_join(core_key, by = "core") %>% 
+    mutate(
+      C_mg_g = C_perc * 10,
+      R13C = ((d13C_VPDB/1000) + 1) * R13C_VPDB,
+      F13C = R13C/(1+R13C),
+      R13C = round(R13C, 4),
+      F13C = round(F13C, 4),
+      C13_mg_g = F13C * C_mg_g,
+      C13_ug_g = C13_mg_g*1000)
+  
+  summary_tc = 
+    combined %>% 
+    group_by(core, type, treatment) %>% 
+    dplyr::summarise(mean_tc_mg_g = mean(C_mg_g),
+                     sd = sd(C_mg_g),
+                     se = sd/sqrt(n()),
+                     cv = (sd/mean_tc_mg_g)*100) %>% 
+    mutate_if(is.numeric, ~round(.,2))
+  
+  summary_c13 = 
+    combined %>% 
+    group_by(core, type, treatment) %>% 
+    dplyr::summarise(mean_c13_ug_g = mean(C13_ug_g),
+                     sd = sd(C13_ug_g),
+                     se = sd/sqrt(n()),
+                     cv = (sd/mean_c13_ug_g)*100) %>% 
+    mutate_if(is.numeric, ~round(.,2))
+  
+  
+  summary_d13c = 
+    combined %>% 
+    group_by(core, type, treatment) %>% 
+    dplyr::summarise(mean_d13C = mean(d13C_VPDB),
+                     sd = sd(d13C_VPDB*-1),
+                     se = sd/sqrt(n()),
+                     cv = (sd/mean_d13C)*100) %>% 
+    mutate_if(is.numeric, ~round(.,2))
+    
+  
+  combined_longform = 
+    combined %>% 
+    dplyr::select(core, type, treatment, C_mg_g, d13C_VPDB, C13_ug_g) %>% 
+    pivot_longer(-c(core, type, treatment), values_to = "value", names_to = "name")  %>% 
+    mutate(type = factor(type, levels = c("control", "sorbed-C", "solution-C")))
+  
+  combined_longform %>% 
+    ggplot(aes(x = type, y = value, group = core, color = core, shape = type))+
+    geom_point(size = 2, stroke = 1, position = position_dodge(width = 0.6), show.legend = F)+
+    scale_shape_manual(values = c(1, 16, 4))+
+    facet_wrap(~name, scales = "free_y")+
+    labs(x = "", y = "")+
+    theme_kp()+
+    NULL
+  
+}
+
+
+
+
+
+calculate_mdc = function(tail, alpha, power, pre, post){
+  n_pre = length(pre)
+  n_post = length(post)
+  
+  b = 1-power
+  
+  MSE_pre = sd(pre)^2
+  MSE_post = sd(post)^2
+  
+  ta = qt(1 - (2*b/2), n_pre+n_post-2)
+  tb = qt(1 - (alpha/tail), n_pre+n_post-2)
+  
+  
+  (ta + tb) * (sqrt((MSE_pre/n_pre) + (MSE_post/n_post)))
+  
+}
+calculate_mdc(tail = 2,
+              alpha = 0.05,
+              power = 0.80,
+              pre = combined %>% filter(core %in% c(21, 23, 25)) %>% pull(C13_ug_g),
+              post = combined %>% filter(core %in% c(6, 7, 9)) %>% pull(C13_ug_g)
+              )
+
+
+calculate_mdc(tail = 2,
+              alpha = 0.05,
+              power = 0.80,
+              pre = combined %>% filter(core %in% c(21, 23, 25)) %>% pull(C_mg_g),
+              post = combined %>% filter(core %in% c(6, 7, 9)) %>% pull(C_mg_g)
+)
