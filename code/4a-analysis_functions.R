@@ -4,7 +4,7 @@ library(agricolae)
 
 # combine and process files -----------------------------------------------------------
 
-combine_data = function(soil, weoc, respiration, core_key, core_weights){
+combine_data = function(soil, weoc, weoc_pellet, respiration, core_key, core_weights){
   ## this function will combine all three fractions of data
   ## first, we clean each file and make sure the columns are compatible
   ## then, combine
@@ -24,6 +24,13 @@ combine_data = function(soil, weoc, respiration, core_key, core_weights){
     dplyr::select(core, fraction, C_mg_g, d13C_VPDB) %>% 
     mutate(core = as.character(core))
   
+  weoc_pellet_new = 
+    weoc_pellet %>% 
+    rename(C_mg_g = totalC_mg_g) %>% 
+    mutate(fraction = "weoc_pellet") %>% 
+    dplyr::select(core, fraction, C_mg_g, d13C_VPDB) %>% 
+    mutate(core = as.character(core))
+  
   respiration_new = 
     respiration %>% 
     rename(C_mg_g = CO2C_mg_g,
@@ -32,15 +39,17 @@ combine_data = function(soil, weoc, respiration, core_key, core_weights){
     dplyr::select(core, fraction, C_mg_g, d13C_VPDB)
   
   combined = 
-    bind_rows(soil_new, weoc_new, respiration_new) %>% 
+    bind_rows(soil_new, weoc_new, weoc_pellet_new, respiration_new) %>% 
     mutate(d13C_VPDB = round(d13C_VPDB,3)) %>% 
     filter(core != 40) %>% 
     drop_na()
   
   core_key %>% 
     dplyr::select(-skip) %>% 
+    mutate(core = as.character(core)) %>% 
     left_join(core_weights%>% dplyr::select(core, od_soil_g) %>% mutate(core = as.character(core)), by = "core") %>% 
-    left_join(combined, by = "core")
+    left_join(combined, by = "core") %>% 
+    filter(!is.na(fraction))
 }
 
 remove_outliers = function(combined_data){
@@ -55,6 +64,7 @@ remove_outliers = function(combined_data){
   
   c13_outliers_combined = 
     combined_data %>%  
+    filter(fraction == "weoc_pellet") %>% 
     group_by(type, treatment, fraction) %>% 
     do(fit_dixon_d13C(.))
   
@@ -578,7 +588,7 @@ make_graphs_desorption = function(combined_data_processed){
       filter(type %in% c("control")) %>% 
       group_by(fraction) %>% 
       dplyr::summarise(d13C_VPDB = mean(d13C_VPDB)) %>% 
-      mutate(fraction = factor(fraction, levels = c("respiration", "weoc", "soil")))
+      mutate(fraction = factor(fraction, levels = c("respiration", "weoc", "weoc_pellet", "soil")))
     
     # second, prepare graph labels ----
     make_hsd_labels = function(combined_data_processed){
@@ -587,6 +597,7 @@ make_graphs_desorption = function(combined_data_processed){
         ~analysis, ~fraction, ~name, ~y,
         "HSD",  "respiration", "d13C_VPDB", 2100,
         "HSD",  "weoc", "d13C_VPDB", 30,
+        "HSD",  "weoc_pellet", "d13C_VPDB", -10,
         "HSD",  "soil", "d13C_VPDB", -10
       )
       
@@ -608,12 +619,12 @@ make_graphs_desorption = function(combined_data_processed){
           do(fit_hsd(.)) # %>% pivot_wider(names_from = "name", values_from = "label")
       }
       desorption_hsd_label = compute_hsd_desorption(combined_data_processed) %>% 
-        mutate(fraction = factor(fraction, levels = c("respiration", "weoc", "soil")))
+        mutate(fraction = factor(fraction, levels = c("respiration", "weoc", "weoc_pellet", "soil")))
       
       
       # c. then, merge the labels with the y
       desorption_hsd_label %>% left_join(desorption_label_y) %>% 
-        mutate(fraction = factor(fraction, levels = c("respiration", "weoc", "soil")))
+        mutate(fraction = factor(fraction, levels = c("respiration", "weoc", "weoc_pellet", "soil")))
     }
     hsd_labels_d13c = make_hsd_labels(combined_data_processed)
     
@@ -623,6 +634,7 @@ make_graphs_desorption = function(combined_data_processed){
         ~fraction, ~name, ~y,
         "respiration", "d13C_VPDB", -300,
         "weoc", "d13C_VPDB", -40,
+        "weoc_pellet", "d13C_VPDB", -35,
         "soil", "d13C_VPDB", -35
       )
       
@@ -655,11 +667,11 @@ make_graphs_desorption = function(combined_data_processed){
       aov %>% left_join(aov_y)
     }
     aov_labels_d13c = make_aov_labels(combined_data_processed) %>% 
-      mutate(fraction = factor(fraction, levels = c("respiration", "weoc", "soil")))
+      mutate(fraction = factor(fraction, levels = c("respiration", "weoc", "weoc_pellet", "soil")))
     
     # third, make graphs ----
     combined_data_processed %>% 
-      mutate(fraction = factor(fraction, levels = c("respiration", "weoc", "soil"))) %>% 
+      mutate(fraction = factor(fraction, levels = c("respiration", "weoc", "weoc_pellet", "soil"))) %>% 
       filter(!type %in% c("control")) %>% 
       ggplot(aes(x = treatment, y = d13C_VPDB, color = type))+
       geom_hline(data = control_summary, aes(yintercept = d13C_VPDB), linetype = "dashed", color = "grey30")+
@@ -688,7 +700,7 @@ make_graphs_desorption = function(combined_data_processed){
       filter(type %in% c("control")) %>% 
       group_by(fraction) %>% 
       dplyr::summarise(C_mg_g = mean(C_mg_g)) %>% 
-      mutate(fraction = factor(fraction, levels = c("respiration", "weoc", "soil")))
+      mutate(fraction = factor(fraction, levels = c("respiration", "weoc", "weoc_pellet", "soil")))
     
     # second, prepare graph labels ----
     make_hsd_labels = function(combined_data_processed){
@@ -697,6 +709,7 @@ make_graphs_desorption = function(combined_data_processed){
         ~analysis, ~fraction, ~name, ~y,
         "HSD",  "respiration", "C_mg_g", 0.15,
         "HSD",  "weoc", "C_mg_g", 0.15,
+        "HSD",  "weoc_pellet", "C_mg_g", 32,
         "HSD",  "soil", "C_mg_g", 32
       )
       
@@ -718,14 +731,14 @@ make_graphs_desorption = function(combined_data_processed){
           do(fit_hsd(.)) # %>% pivot_wider(names_from = "name", values_from = "label")
       }
       desorption_hsd_label = compute_hsd_desorption(combined_data_processed) %>% 
-        mutate(fraction = factor(fraction, levels = c("respiration", "weoc", "soil")))
+        mutate(fraction = factor(fraction, levels = c("respiration", "weoc", "weoc_pellet", "soil")))
       
       # c. then, merge the labels with the y
       desorption_hsd_label %>% left_join(desorption_label_y) %>% 
-        mutate(fraction = factor(fraction, levels = c("respiration", "weoc", "soil")))
+        mutate(fraction = factor(fraction, levels = c("respiration", "weoc", "weoc_pellet", "soil")))
     }
     hsd_labels_c = make_hsd_labels(combined_data_processed) %>% 
-      mutate(fraction = factor(fraction, levels = c("respiration", "weoc", "soil")))
+      mutate(fraction = factor(fraction, levels = c("respiration", "weoc", "weoc_pellet", "soil")))
     
     make_aov_labels = function(combined_data_processed){
       ## AOV_Y
@@ -733,6 +746,7 @@ make_graphs_desorption = function(combined_data_processed){
         ~fraction, ~name, ~y,
         "respiration", "C_mg_g", -0.02,
         "weoc", "C_mg_g", 0,
+        "weoc_pellet", "C_mg_g", 22,
         "soil", "C_mg_g", 25
       )
       
@@ -764,11 +778,11 @@ make_graphs_desorption = function(combined_data_processed){
       aov %>% left_join(aov_y)
     }
     aov_labels_c = make_aov_labels(combined_data_processed) %>% 
-      mutate(fraction = factor(fraction, levels = c("respiration", "weoc", "soil")))
+      mutate(fraction = factor(fraction, levels = c("respiration", "weoc", "weoc_pellet", "soil")))
     
     # third, make graph ----
     combined_data_processed %>% 
-      mutate(fraction = factor(fraction, levels = c("respiration", "weoc", "soil"))) %>% 
+      mutate(fraction = factor(fraction, levels = c("respiration", "weoc", "weoc_pellet", "soil"))) %>% 
       filter(!type %in% c("control")) %>% 
       ggplot(aes(x = treatment, y = C_mg_g, color = type))+
       geom_hline(data = control_summary, aes(yintercept = C_mg_g), linetype = "dashed", color = "grey30")+
@@ -798,7 +812,7 @@ make_graphs_desorption = function(combined_data_processed){
       filter(type %in% c("control")) %>% 
       group_by(fraction) %>% 
       dplyr::summarise(C13_mg_g = mean(C13_mg_g)) %>% 
-      mutate(fraction = factor(fraction, levels = c("respiration", "weoc", "soil")))
+      mutate(fraction = factor(fraction, levels = c("respiration", "weoc", "weoc_pellet", "soil")))
     
     # second, prepare graph labels ----
     make_hsd_labels = function(combined_data_processed){
@@ -807,6 +821,7 @@ make_graphs_desorption = function(combined_data_processed){
         ~analysis, ~fraction, ~name, ~y,
         "HSD",  "respiration", "C13_mg_g", 3.5,
         "HSD",  "weoc", "C13_mg_g", 1.5,
+        "HSD",  "weoc_pellet", "C13_mg_g", 400,
         "HSD",  "soil", "C13_mg_g", 400
       )
       
@@ -828,14 +843,14 @@ make_graphs_desorption = function(combined_data_processed){
           do(fit_hsd(.)) # %>% pivot_wider(names_from = "name", values_from = "label")
       }
       desorption_hsd_label = compute_hsd_desorption(combined_data_processed) %>% 
-        mutate(fraction = factor(fraction, levels = c("respiration", "weoc", "soil")))
+        mutate(fraction = factor(fraction, levels = c("respiration", "weoc", "weoc_pellet", "soil")))
       
       # c. then, merge the labels with the y
       desorption_hsd_label %>% left_join(desorption_label_y) %>% 
-        mutate(fraction = factor(fraction, levels = c("respiration", "weoc", "soil")))
+        mutate(fraction = factor(fraction, levels = c("respiration", "weoc", "weoc_pellet", "soil")))
     }
     hsd_labels_c = make_hsd_labels(combined_data_processed) %>% 
-      mutate(fraction = factor(fraction, levels = c("respiration", "weoc", "soil")))
+      mutate(fraction = factor(fraction, levels = c("respiration", "weoc", "weoc_pellet", "soil")))
     
     make_aov_labels = function(combined_data_processed){
       ## AOV_Y
@@ -843,6 +858,7 @@ make_graphs_desorption = function(combined_data_processed){
         ~fraction, ~name, ~y,
         "respiration", "C13_mg_g", -0.5,
         "weoc", "C13_mg_g", 0,
+        "weoc_pellet", "C13_mg_g", 250,
         "soil", "C13_mg_g", 250
       )
       
@@ -874,11 +890,11 @@ make_graphs_desorption = function(combined_data_processed){
       aov %>% left_join(aov_y)
     }
     aov_labels_c = make_aov_labels(combined_data_processed) %>% 
-      mutate(fraction = factor(fraction, levels = c("respiration", "weoc", "soil")))
+      mutate(fraction = factor(fraction, levels = c("respiration", "weoc", "weoc_pellet", "soil")))
     
     # third, make graph ----
     combined_data_processed %>% 
-      mutate(fraction = factor(fraction, levels = c("respiration", "weoc", "soil"))) %>% 
+      mutate(fraction = factor(fraction, levels = c("respiration", "weoc", "weoc_pellet", "soil"))) %>% 
       filter(!type %in% c("control")) %>% 
       ggplot(aes(x = treatment, y = C13_mg_g*1000, color = type))+
       geom_hline(data = control_summary, aes(yintercept = C13_mg_g*1000), linetype = "dashed", color = "grey30")+
@@ -912,7 +928,7 @@ make_graphs_priming = function(combined_data_processed){
       filter(type %in% c("control")) %>% 
       group_by(fraction) %>% 
       dplyr::summarise(d13C_VPDB = mean(d13C_VPDB)) %>% 
-      mutate(fraction = factor(fraction, levels = c("respiration", "weoc", "soil")))
+      mutate(fraction = factor(fraction, levels = c("respiration", "weoc", "weoc_pellet", "soil")))
     
     # second, prepare graph labels ----
     make_hsd_labels = function(combined_data_processed){
@@ -921,6 +937,7 @@ make_graphs_priming = function(combined_data_processed){
         ~analysis, ~fraction, ~name, ~y,
         "HSD",  "respiration", "d13C_VPDB", 2100,
         "HSD",  "weoc", "d13C_VPDB", 30,
+        "HSD",  "weoc_pellet", "d13C_VPDB", -10,
         "HSD",  "soil", "d13C_VPDB", -10
       )
       
@@ -942,12 +959,12 @@ make_graphs_priming = function(combined_data_processed){
           do(fit_hsd(.)) # %>% pivot_wider(names_from = "name", values_from = "label")
       }
       desorption_hsd_label = compute_hsd_desorption(combined_data_processed) %>% 
-        mutate(fraction = factor(fraction, levels = c("respiration", "weoc", "soil")))
+        mutate(fraction = factor(fraction, levels = c("respiration", "weoc", "weoc_pellet", "soil")))
       
       
       # c. then, merge the labels with the y
       desorption_hsd_label %>% left_join(desorption_label_y) %>% 
-        mutate(fraction = factor(fraction, levels = c("respiration", "weoc", "soil")))
+        mutate(fraction = factor(fraction, levels = c("respiration", "weoc", "weoc_pellet", "soil")))
     }
     hsd_labels_d13c = make_hsd_labels(combined_data_processed)
     
@@ -957,6 +974,7 @@ make_graphs_priming = function(combined_data_processed){
         ~fraction, ~name, ~y,
         "respiration", "d13C_VPDB", -300,
         "weoc", "d13C_VPDB", -40,
+        "weoc_pellet", "d13C_VPDB", -35,
         "soil", "d13C_VPDB", -35
       )
       
@@ -987,11 +1005,11 @@ make_graphs_priming = function(combined_data_processed){
       aov %>% left_join(aov_y)
     }
     aov_labels_d13c = make_aov_labels(combined_data_processed) %>% 
-      mutate(fraction = factor(fraction, levels = c("respiration", "weoc", "soil")))
+      mutate(fraction = factor(fraction, levels = c("respiration", "weoc", "weoc_pellet", "soil")))
     
     # third, make graphs ----
     combined_data_processed %>% 
-      mutate(fraction = factor(fraction, levels = c("respiration", "weoc", "soil"))) %>% 
+      mutate(fraction = factor(fraction, levels = c("respiration", "weoc", "weoc_pellet", "soil"))) %>% 
       # filter(type %in% c("solution-C")) %>% 
       filter(!type %in% c("control")) %>% 
       ggplot(aes(x = treatment, y = d13C_VPDB, color = type))+
@@ -1024,7 +1042,7 @@ make_graphs_priming = function(combined_data_processed){
       filter(type %in% c("control")) %>% 
       group_by(fraction) %>% 
       dplyr::summarise(C_mg_g = mean(C_mg_g)) %>% 
-      mutate(fraction = factor(fraction, levels = c("respiration", "weoc", "soil")))
+      mutate(fraction = factor(fraction, levels = c("respiration", "weoc", "weoc_pellet", "soil")))
     
     # second, prepare graph labels ----
     make_hsd_labels = function(combined_data_processed){
@@ -1033,6 +1051,7 @@ make_graphs_priming = function(combined_data_processed){
         ~analysis, ~fraction, ~name, ~y,
         "HSD",  "respiration", "C_mg_g", 0.15,
         "HSD",  "weoc", "C_mg_g", 0.15,
+        "HSD",  "weoc_pellet", "C_mg_g", 32,
         "HSD",  "soil", "C_mg_g", 32
       )
       
@@ -1054,14 +1073,14 @@ make_graphs_priming = function(combined_data_processed){
           do(fit_hsd(.)) # %>% pivot_wider(names_from = "name", values_from = "label")
       }
       desorption_hsd_label = compute_hsd_desorption(combined_data_processed) %>% 
-        mutate(fraction = factor(fraction, levels = c("respiration", "weoc", "soil")))
+        mutate(fraction = factor(fraction, levels = c("respiration", "weoc", "weoc_pellet", "soil")))
       
       # c. then, merge the labels with the y
       desorption_hsd_label %>% left_join(desorption_label_y) %>% 
-        mutate(fraction = factor(fraction, levels = c("respiration", "weoc", "soil")))
+        mutate(fraction = factor(fraction, levels = c("respiration", "weoc", "weoc_pellet", "soil")))
     }
     hsd_labels_c = make_hsd_labels(combined_data_processed) %>% 
-      mutate(fraction = factor(fraction, levels = c("respiration", "weoc", "soil")))
+      mutate(fraction = factor(fraction, levels = c("respiration", "weoc", "weoc_pellet", "soil")))
     
     make_aov_labels = function(combined_data_processed){
       ## AOV_Y
@@ -1069,6 +1088,7 @@ make_graphs_priming = function(combined_data_processed){
         ~fraction, ~name, ~y,
         "respiration", "C_mg_g", -0.02,
         "weoc", "C_mg_g", 0,
+        "weoc_pellet", "C_mg_g", 22,
         "soil", "C_mg_g", 25
       )
       
@@ -1098,7 +1118,7 @@ make_graphs_priming = function(combined_data_processed){
       aov %>% left_join(aov_y)
     }
     aov_labels_c = make_aov_labels(combined_data_processed) %>% 
-      mutate(fraction = factor(fraction, levels = c("respiration", "weoc", "soil")))
+      mutate(fraction = factor(fraction, levels = c("respiration", "weoc", "weoc_pellet", "soil")))
     
     # 2b, add empty labels for y axis spacing ----
     empty_label_y = tribble(
@@ -1107,22 +1127,24 @@ make_graphs_priming = function(combined_data_processed){
       "empty",  "respiration", "C_mg_g", -0.02, " ",
       "empty",  "weoc", "C_mg_g", 0.15, " ",
       "empty",  "weoc", "C_mg_g", 0, " ",
+      "empty",  "weoc_pellet", "C_mg_g", 32, " ",
+      "empty",  "weoc_pellet", "C_mg_g", 22, " ",
       "empty",  "soil", "C_mg_g", 32, " ",
       "empty",  "soil", "C_mg_g", 25, " "
     ) %>% 
-      mutate(fraction = factor(fraction, levels = c("respiration", "weoc", "soil")))
+      mutate(fraction = factor(fraction, levels = c("respiration", "weoc", "weoc_pellet", "soil")))
     
     
     # third, make graph ----
     combined_data_processed %>% 
-      mutate(fraction = factor(fraction, levels = c("respiration", "weoc", "soil"))) %>% 
+      mutate(fraction = factor(fraction, levels = c("respiration", "weoc", "weoc_pellet", "soil"))) %>% 
       #filter(type %in% c("solution-C")) %>% 
       filter(!type %in% "control") %>% 
       ggplot(aes(x = treatment, y = C_mg_g, color = type))+
       geom_hline(data = control_summary, aes(yintercept = C_mg_g), linetype = "dashed", color = "grey30")+
       geom_point(size = 3, show.legend = FALSE) +
-      geom_text(data = hsd_labels_c %>% filter(type == "sorbed-C"), aes(label = label, y = y), color = "black")+
-      geom_text(data = aov_labels_c %>% filter(type == "sorbed-C"), aes(label = label, y = y), color = "black", size = 6)+
+      geom_text(data = hsd_labels_c %>% filter(type == "solution-C"), aes(label = label, y = y), color = "black")+
+      geom_text(data = aov_labels_c %>% filter(type == "solution-C"), aes(label = label, y = y), color = "black", size = 6)+
       geom_text(data = empty_label_y, aes(label = label, y = y, x = 1.5), color = NA)+
       #scale_color_manual(values = pnw_palette("Sailboat", 3))+
       scale_color_manual(values = c("#6e7cb9", NA))+
@@ -1150,7 +1172,7 @@ make_graphs_priming = function(combined_data_processed){
       filter(type %in% c("control")) %>% 
       group_by(fraction) %>% 
       dplyr::summarise(C13_mg_g = mean(C13_mg_g)) %>% 
-      mutate(fraction = factor(fraction, levels = c("respiration", "weoc", "soil")))
+      mutate(fraction = factor(fraction, levels = c("respiration", "weoc", "weoc_pellet", "soil")))
     
     # second, prepare graph labels ----
     make_hsd_labels = function(combined_data_processed){
@@ -1159,6 +1181,7 @@ make_graphs_priming = function(combined_data_processed){
         ~analysis, ~fraction, ~name, ~y,
         "HSD",  "respiration", "C13_mg_g", 3.5,
         "HSD",  "weoc", "C13_mg_g", 1.5,
+        "HSD",  "weoc_pellet", "C13_mg_g", 400,
         "HSD",  "soil", "C13_mg_g", 400
       )
       
@@ -1180,14 +1203,14 @@ make_graphs_priming = function(combined_data_processed){
           do(fit_hsd(.)) # %>% pivot_wider(names_from = "name", values_from = "label")
       }
       desorption_hsd_label = compute_hsd_desorption(combined_data_processed) %>% 
-        mutate(fraction = factor(fraction, levels = c("respiration", "weoc", "soil")))
+        mutate(fraction = factor(fraction, levels = c("respiration", "weoc", "weoc_pellet", "soil")))
       
       # c. then, merge the labels with the y
       desorption_hsd_label %>% left_join(desorption_label_y) %>% 
-        mutate(fraction = factor(fraction, levels = c("respiration", "weoc", "soil")))
+        mutate(fraction = factor(fraction, levels = c("respiration", "weoc", "weoc_pellet", "soil")))
     }
     hsd_labels_c = make_hsd_labels(combined_data_processed) %>% 
-      mutate(fraction = factor(fraction, levels = c("respiration", "weoc", "soil")))
+      mutate(fraction = factor(fraction, levels = c("respiration", "weoc", "weoc_pellet", "soil")))
     
     make_aov_labels = function(combined_data_processed){
       ## AOV_Y
@@ -1195,6 +1218,7 @@ make_graphs_priming = function(combined_data_processed){
         ~fraction, ~name, ~y,
         "respiration", "C13_mg_g", -0.5,
         "weoc", "C13_mg_g", 0,
+        "weoc_pellet", "C13_mg_g", 250,
         "soil", "C13_mg_g", 250
       )
       
@@ -1224,7 +1248,7 @@ make_graphs_priming = function(combined_data_processed){
       aov %>% left_join(aov_y)
     }
     aov_labels_c = make_aov_labels(combined_data_processed) %>% 
-      mutate(fraction = factor(fraction, levels = c("respiration", "weoc", "soil")))
+      mutate(fraction = factor(fraction, levels = c("respiration", "weoc", "weoc_pellet", "soil")))
     
     # 2b, add empty labels for y axis spacing ----
     empty_label_y = tribble(
@@ -1233,15 +1257,17 @@ make_graphs_priming = function(combined_data_processed){
       "empty",  "respiration", "C13_mg_g", 0, " ",
       "empty",  "weoc", "C13_mg_g", 1.5, " ",
       "empty",  "weoc", "C13_mg_g", 0, " ",
+      "empty",  "weoc_pellet", "C13_mg_g", 400, " ",
+      "empty",  "weoc_pellet", "C13_mg_g", 250, " ",
       "empty",  "soil", "C13_mg_g", 400, " ",
       "empty",  "soil", "C13_mg_g", 250, " "
     ) %>% 
-      mutate(fraction = factor(fraction, levels = c("respiration", "weoc", "soil")))
+      mutate(fraction = factor(fraction, levels = c("respiration", "weoc", "weoc_pellet", "soil")))
     
     
     # third, make graph ----
     combined_data_processed %>% 
-      mutate(fraction = factor(fraction, levels = c("respiration", "weoc", "soil"))) %>% 
+      mutate(fraction = factor(fraction, levels = c("respiration", "weoc", "weoc_pellet", "soil"))) %>% 
       #filter(type %in% c("solution-C")) %>% 
       filter(!type %in% "control") %>% 
       ggplot(aes(x = treatment, y = C13_mg_g*1000, color = type))+
@@ -1538,7 +1564,7 @@ summary(aov(D13C_calc ~ treatment,
 plot_sorbed_and_solution = function(combined_data_processed){
   reorder_factors = function(dat){
     dat %>% 
-      mutate(fraction = factor(fraction, levels = c("respiration", "weoc", "soil")),
+      mutate(fraction = factor(fraction, levels = c("respiration", "weoc", "weoc_pellet", "soil")),
              type = factor(type, levels = c("control", "sorbed-C", "solution-C")))
   }
   
@@ -1565,14 +1591,17 @@ plot_sorbed_and_solution = function(combined_data_processed){
       ~analysis, ~fraction, ~variable, ~y,
       "HSD",  "respiration", "d13C_VPDB", 2100,
       "HSD",  "weoc", "d13C_VPDB", 30,
+      "HSD",  "weoc_pellet", "d13C_VPDB", -20,
       "HSD",  "soil", "d13C_VPDB", -20,
       
       "HSD",  "respiration", "C_mg_g", 0.154,
       "HSD",  "weoc", "C_mg_g", 0.15,
+      "HSD",  "weoc_pellet", "C_mg_g", 30,
       "HSD",  "soil", "C_mg_g", 34,
       
       "HSD",  "respiration", "C13_ug_g", 3.5,
       "HSD",  "weoc", "C13_ug_g", 1.5,
+      "HSD",  "weoc_pellet", "C13_ug_g", 320,
       "HSD",  "soil", "C13_ug_g", 360,
       
     )
@@ -1593,7 +1622,7 @@ plot_sorbed_and_solution = function(combined_data_processed){
     
     # c. then, merge the labels with the y
     hsd_label %>% left_join(label_y) %>% 
-      mutate(fraction = factor(fraction, levels = c("respiration", "weoc", "soil"))) %>% 
+      mutate(fraction = factor(fraction, levels = c("respiration", "weoc", "weoc_pellet", "soil"))) %>% 
       reorder_factors(.)
       
   }

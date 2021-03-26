@@ -8,13 +8,14 @@ analysis_plan = drake_plan(
   # 1 load files
   soil = read.csv(file_in(SOIL_PROCESSED)),
   weoc = read.csv(file_in(WEOC_PROCESSED)),
+  weoc_pellet = read.csv(file_in(WEOC_PELLETS_PROCESSED)),
   respiration = read.csv(file_in(RESPIRATION_PROCESSED)),
   core_key = read.csv(file_in("data/core_key.csv")) %>% mutate(core = as.character(core)) %>% filter(is.na(skip)),
   core_weights = read.csv("data/processed/core_weights.csv"),
 
   
   # 2 combine and clean
-  combined_data = combine_data(soil, weoc, respiration, core_key, core_weights),
+  combined_data = combine_data(soil, weoc, weoc_pellet, respiration, core_key, core_weights),
   combined_data_outliers = remove_outliers(combined_data),
   combined_data_processed = calculate_indices(combined_data_outliers),
   
@@ -35,6 +36,7 @@ analysis_plan = drake_plan(
   # report 
   report = rmarkdown::render(
     knitr_in("reports/destab_slides_v2.Rmd") #, output_format = rmarkdown::pdf_document()
+
     ),
   #pagedown::chrome_print("reports/destab_slides_v2.html", "reports/destab_slides_2021-02-03.pdf")
   
