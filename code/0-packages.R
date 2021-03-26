@@ -18,6 +18,7 @@ library(drake)
 library(PNWColors)
 library(outliers)
 library(patchwork)
+library(ggforce)
 
 # 2. SET FILE NAMES/PATHS -------------------------------------------------
 COREKEY = "data/core_key.csv"

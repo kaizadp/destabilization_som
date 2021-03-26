@@ -1680,7 +1680,7 @@ plot_sorbed_and_solution = function(combined_data_processed){
 plot_sorbed_and_solution(combined_data_processed)
 
 
-plot_mass_balance_sorbed_and_solution = function(combined_data_processed){
+plot_mass_balance_sorbed_and_solution_OLD = function(combined_data_processed){
   ## first, subset only the necessary data
   combined_data2 = 
     combined_data_processed %>% 
@@ -1762,6 +1762,96 @@ plot_mass_balance_sorbed_and_solution = function(combined_data_processed){
     scale_fill_manual(values = soilpalettes::soil_palette("redox2", 3))+
     scale_color_manual(values = soilpalettes::soil_palette("redox2", 3))+
     theme_kp()+
+    NULL
+  
+  list(massbalance_c13 = massbalance_c13,
+       massbalance_c = massbalance_c)
+}
+
+plot_mass_balance_sorbed_and_solution = function(combined_data_processed){
+  ## first, subset only the necessary data
+  combined_data2 = 
+    combined_data_processed %>% 
+    filter(treatment == "2-wetting") %>% 
+    mutate(C13_ug_g = C13_mg_g * 1000) %>% 
+    dplyr::select(core, type, treatment, fraction, C_mg_g, d13C_VPDB, C13_ug_g) %>% 
+    reorder_factors(.)
+  
+  ## prepare summary
+  combined_data2_summary = 
+    combined_data2 %>%
+    filter(fraction != "soil") %>% 
+    group_by(core) %>% 
+    group_by(treatment, type, fraction) %>%
+    dplyr::summarise(C_mg_g = mean(C_mg_g),
+                     C13_ug_g = mean(C13_ug_g)) %>%
+    mutate(across(where(is.numeric), round, 2))
+  
+  ## prepare labels
+  mass_balance_label = 
+    combined_data2_summary %>% 
+    mutate(y_ug = case_when(fraction == "respiration" ~ 355,
+                            fraction == "soil" ~ 200),
+           label_ug = paste(fraction, "\n", C13_ug_g),
+           y_mg = case_when(fraction == "respiration" ~ 33,
+                            fraction == "soil" ~ 15),
+           label_mg = paste(fraction, "\n", C_mg_g))
+  
+  mass_balance_label_total = 
+    combined_data2_summary %>%
+    group_by(treatment, type) %>% 
+    dplyr::summarise(total_C = sum(C_mg_g),
+                     total_C13 = sum(C13_ug_g)) %>% 
+    mutate(label_C = paste("total:", total_C, "mg/g"),
+           label_C13 = paste("total:", total_C13, "μg/g"))
+  
+  mass_balance_tukey_label =
+    tribble(
+      ~x, ~y, ~label,
+      "control", 330, "(b)",
+      "sorbed-C", 330, "(b)",
+      "solution-C", 330, "(a)",
+      
+      "control", 180, "(A)",
+      "sorbed-C", 180, "(B)",
+      "solution-C", 180, "(B)",
+    )
+  ## make plots
+  massbalance_c13 = 
+    combined_data2_summary %>% 
+    filter(fraction != "soil") %>% 
+    ggplot(aes(x = type, y = C13_ug_g))+
+    geom_bar(aes(fill = fraction, color = fraction), 
+             stat = "identity", #position = position_dodge(width = 0.7), 
+             width = 0.5, alpha = 0.7, size = 0.7)+
+    # geom_text(data = mass_balance_label, aes(y = y_ug, label = label_ug))+
+    geom_text(data = mass_balance_label_total, aes(y = 2, label = label_C13),
+              nudge_x = -0.32, angle = 90, hjust = 0)+
+    # geom_text(data = mass_balance_tukey_label, aes(x = x, y = y, label = label))+
+    labs(x = "", y = "13C (μg/g)",
+         caption = "sorbed-C: 7.72 μg/g 13C added \n solution-C: 6.02 μg/g 13C added")+
+    scale_fill_manual(values = soilpalettes::soil_palette("redox2", 3))+
+    scale_color_manual(values = soilpalettes::soil_palette("redox2", 3))+
+    facet_zoom(ylim = c(260, 300))+
+    #theme_kp()+
+    NULL
+  
+  massbalance_c = 
+    combined_data2_summary %>% 
+    filter(fraction != "soil") %>% 
+    ggplot(aes(x = type, y = C_mg_g))+
+    geom_bar(aes(fill = fraction, color = fraction), 
+             stat = "identity", #position = position_dodge(width = 0.7), 
+             width = 0.5, alpha = 0.7, size = 0.7)+
+    # geom_text(data = mass_balance_label, aes(y = y_mg, label = label_mg))+
+    geom_text(data = mass_balance_label_total, aes(y = 2, label = label_C),
+              nudge_x = -0.32, angle = 90, hjust = 0)+
+    labs(x = "", y = "C (mg/g)",
+         caption = "sorbed-C: 0.0125 mg/g 13C added \n solution-C: 0.04 mg/g C added")+
+    scale_fill_manual(values = soilpalettes::soil_palette("redox2", 3))+
+    scale_color_manual(values = soilpalettes::soil_palette("redox2", 3))+
+    facet_zoom(ylim = c(25, 28))+
+    #theme_kp()+
     NULL
   
   list(massbalance_c13 = massbalance_c13,
