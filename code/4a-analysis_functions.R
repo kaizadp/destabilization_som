@@ -1787,6 +1787,30 @@ plot_mass_balance_sorbed_and_solution = function(combined_data_processed){
                      C13_ug_g = mean(C13_ug_g)) %>%
     mutate(across(where(is.numeric), round, 2))
   
+  ## prepare summary table
+  combined_data2_summarytable = 
+    combined_data2 %>%
+    filter(fraction != "soil") %>% 
+    dplyr::select(-C_mg_g, -d13C_VPDB) %>% 
+    group_by(core) %>% 
+    dplyr::mutate(total = sum(C13_ug_g)) %>% 
+    pivot_wider(names_from = "fraction", values_from = "C13_ug_g") %>% 
+    pivot_longer(-c(core:treatment), names_to = "fraction", values_to = "C13_ug_g") %>% 
+    group_by(treatment, type, fraction) %>%
+    dplyr::summarise(C13_ug_g_mean = mean(C13_ug_g, na.rm = TRUE),
+                     se = sd(C13_ug_g, na.rm = TRUE)/sqrt(n())) %>%
+    mutate(across(where(is.numeric), round, 2))
+  
+  ## do HSD on total 
+  total = combined_data2 %>%
+    filter(fraction != "soil") %>% 
+    dplyr::select(-C_mg_g, -d13C_VPDB) %>% 
+    group_by(core, type, treatment) %>% 
+    dplyr::summarize(total = sum(C13_ug_g)) 
+  
+  total_aov = aov(total ~ type, data = total)
+  h = HSD.test(total_aov, "type")
+  
   ## prepare labels
   mass_balance_label = 
     combined_data2_summary %>% 
