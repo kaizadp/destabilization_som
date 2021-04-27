@@ -66,9 +66,79 @@ make(picarro_plan)
 
 loadd(ghg_fluxes)
 
-ghg_fluxes %>% 
-  ggplot(aes(x = DATETIME, y = flux_co2_umol_g_s, color = treatment_mgC))+
+ghg_fluxes2 %>% 
+  filter(treatment_mgC <= 5) %>% 
+  ggplot(aes(x = DATETIME, y = flux_co2_umol_g_s, color = as.character(treatment_mgC)))+
   geom_path(aes(group = treatment_mgC))+
-  scale_color_gradientn(colors = PNWColors::pnw_palette("Sunset2", 7))+
+  #scale_color_gradientn(colors = PNWColors::pnw_palette("Sunset2", 7))+
+  scale_color_manual(values = PNWColors::pnw_palette("Sunset2", 3))+
   facet_grid(.~goethite)
+
+ghg_fluxes2 = ghg_fluxes %>% distinct()
+
+ghg_fluxes2_2_5 = 
+  ghg_fluxes2 %>% 
+  filter(treatment_mgC < 5)
+
+nlme::lme(flux_co2_umol_g_s ~ treatment_mgC, random = ~1|, data = ghg_fluxes2_2_5)
+
+
+
+total = ghg_fluxes2 %>% 
+  group_by(goethite, treatment_mgC) %>% 
+  dplyr::summarise(total = sum(flux_co2_umol_g_s))
+
+a = 
+  total %>% 
+  filter(goethite == "soil + goethite") %$%
+  aov(total ~ treatment_mgC)
+summary(a)
+
+agricolae::HSD.test(a, "treatment_mgC") %>% print()
+
+
+cumflux = 
+  ghg_fluxes2 %>% 
+  dplyr::select(Core, Sample_number, goethite, treatment_mgC,  DATETIME, flux_co2_umol_g_s) %>% 
+  group_by(Core) %>% 
+  mutate(next_flux = lead(flux_co2_umol_g_s),
+         next_time = lead(DATETIME),
+         delta_time = as.numeric(next_time-DATETIME)) %>% 
+  drop_na() %>% 
+  rowwise() %>% 
+  mutate(
+         #delta_flux = next_flux - flux_co2_umol_g_s,
+         mean_flux = mean(flux_co2_umol_g_s, next_flux, na.rm = TRUE),
+         evolved = mean_flux/(delta_time*60)) %>% 
+  ungroup() %>% 
+  group_by(Core) %>% 
+  mutate(cum_evolved_umol_g = cumsum(evolved),
+         cum_evolved_ug_g = cum_evolved_umol_g * 12,
+         cum_evolved_mg_g = cum_evolved_ug_g/1000)
+
+  
+cumflux %>% 
+  #filter(treatment_mgC <= 5) %>% 
+  ggplot(aes(x = DATETIME, y = cum_evolved_mg_g, color = as.character(treatment_mgC)))+
+  geom_path()+
+  facet_grid(. ~ goethite)+
+  theme_bw()+
+  NULL
+  
+  
+  
+b = 
+  cumflux %>%
+  group_by(Core) %>% 
+  filter(cum_evolved_mg_g == max(cum_evolved_mg_g)) %>% 
+  filter(goethite == "soil + goethite") %$%
+  aov(cum_evolved_mg_g ~ treatment_mgC)
+summary(b)
+
+agricolae::HSD.test(b, "treatment_mgC") %>% print()  
+  
+  
+  
+  
+  
 
