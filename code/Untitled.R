@@ -150,8 +150,8 @@ loadd(combined_data_processed)
 calculate_mdc(tail = 2,
               alpha = 0.05,
               power = 0.80,
-              pre = combined_data_processed %>% filter(type == "control" & fraction == "soil") %>% mutate(C13_ug_g = C13_mg_g*1000)%>% pull(C13_ug_g), 
-              post = combined_data_processed %>% filter(type == "sorbed-C" & fraction == "soil") %>% mutate(C13_ug_g = C13_mg_g*1000)%>% pull(C13_ug_g))
+              pre = combined_data_processed %>% filter(type == "control" & fraction == "soil"& treatment == "2-wetting") %>% mutate(C13_ug_g = C13_mg_g*1000)%>% pull(C13_ug_g), 
+              post = combined_data_processed %>% filter(type == "solution-C" & fraction == "soil"& treatment == "2-wetting") %>% mutate(C13_ug_g = C13_mg_g*1000)%>% pull(C13_ug_g))
 
 ## comparing solution-C 1-time-zero vs. 2-wetting, MDC = 22.89 for a = 0.05 and power = 0.80
 
@@ -197,7 +197,7 @@ R13C = 0.0109
 # -------------------------------------------------------------------------
 
 
-  combined_data_processed_summary %>% 
+combined_data_processed_summary %>% 
   filter(type != "solution-C" & !(fraction == "respiration" & treatment == "3-drying")) %>% 
   ggplot(aes(x = treatment, y = C13_mg_g*1000))+
   geom_bar(aes(fill = fraction, color = fraction), stat = "identity", position = position_dodge(width = 0.7), 
@@ -206,7 +206,7 @@ R13C = 0.0109
   #annotate("text", label = "total 13C in soil (μg/g):", x = 0.7, y = 3.10, hjust = 0)+
   labs(x = "", y = "13C (μg/g)")+
   scale_x_discrete(labels = c("T0", "W", "D", "DW"))+
-    scale_y_log10()+
+  scale_y_log10()+
   #scale_fill_manual(values = pnw_palette("Sunset", 3))+
   scale_fill_manual(values = soilpalettes::soil_palette("redox2", 3))+
   scale_color_manual(values = soilpalettes::soil_palette("redox2", 3))+
@@ -214,119 +214,173 @@ R13C = 0.0109
   theme_kp()+
   #theme(axis.text.x = element_text(angle = 45))+
   NULL
-  
-  
-  
-  combined_data_processed %>% 
-    filter(type != "solution-C" & !(fraction == "respiration" & treatment == "3-drying")) %>% 
-    ggplot(aes(x = treatment, y = C13_mg_g*1000))+
-#    geom_bar(aes(fill = fraction, color = fraction), stat = "identity", position = position_dodge(width = 0.7), 
-#             width = 0.5, alpha = 0.7, size = 0.7)+
-    geom_point(aes(color = fraction))+
-    #geom_text(data = label %>%  filter(type != "solution-C"), aes(y = 2.95, label = C13_mg_g*1000))+
-    #annotate("text", label = "total 13C in soil (μg/g):", x = 0.7, y = 3.10, hjust = 0)+
-    labs(x = "", y = "13C (μg/g)")+
-    scale_x_discrete(labels = c("T0", "W", "D", "DW"))+
-    scale_y_log10()+
-    #scale_fill_manual(values = pnw_palette("Sunset", 3))+
-    scale_fill_manual(values = soilpalettes::soil_palette("redox2", 3))+
-    scale_color_manual(values = soilpalettes::soil_palette("redox2", 3))+
-    facet_wrap(~type)+
-    theme_kp()+
-    #theme(axis.text.x = element_text(angle = 45))+
-    NULL
-  
-  
-  combined_data_processed %>% 
-    filter(type != "solution-C" & !(treatment == "3-drying")) %>%
-    group_by(type, fraction, treatment) %>% 
-    dplyr::summarise(C13 = mean(C13_mg_g*1000)) %>% 
-    pivot_wider(names_from = "type", values_from = "C13") %>% 
-    mutate(diff_ug_g = `sorbed-C` - control) %>% 
-    
-    ggplot(aes(x = treatment, y = diff_ug_g))+
-    geom_point(aes(color = fraction))+
-    labs(x = "", y = "13C difference (μg/g)")+
-    scale_x_discrete(labels = c("T0", "W", "D", "DW"))+
-    #scale_y_log10()+
-    #scale_fill_manual(values = pnw_palette("Sunset", 3))+
-    scale_fill_manual(values = soilpalettes::soil_palette("redox2", 3))+
-    scale_color_manual(values = soilpalettes::soil_palette("redox2", 3))+
-    #facet_wrap(~type)+
-    theme_kp()+
-    #theme(axis.text.x = element_text(angle = 45))+
-    NULL
-    
-  
-  
-  combined_data_processed %>% 
-    filter(type != "sorbed-C" & (treatment %in% c("1-time-zero", "2-wetting"))) %>%
-    group_by(type, fraction, treatment) %>% 
-    dplyr::summarise(C13 = mean(C13_mg_g*1000)) %>% 
-    pivot_wider(names_from = "type", values_from = "C13") %>% 
-    mutate(diff_ug_g = `solution-C` - control) %>% 
-    
-    ggplot(aes(x = treatment, y = diff_ug_g))+
-    geom_point(aes(color = fraction))+
-    labs(x = "", y = "13C difference (μg/g)")+
-    scale_x_discrete(labels = c("T0", "+C"))+
-    #scale_y_log10()+
-    #scale_fill_manual(values = pnw_palette("Sunset", 3))+
-    scale_fill_manual(values = soilpalettes::soil_palette("redox2", 3))+
-    scale_color_manual(values = soilpalettes::soil_palette("redox2", 3))+
-    #facet_wrap(~type)+
-    theme_kp()+
-    #theme(axis.text.x = element_text(angle = 45))+
-    NULL
-  
-  
-  
-  combined_data_processed %>% 
-    #filter(type != "sorbed-C" & (treatment %in% c("1-time-zero", "2-wetting"))) %>%
-    group_by(type, fraction, treatment) %>% 
-    dplyr::summarise(C13 = mean(C13_mg_g*1000)) %>% 
-    pivot_wider(names_from = "type", values_from = "C13") %>% 
-    mutate(diff_sol_ug_g = `solution-C` - control,
-           diff_sor_ug_g = `sorbed-C` - control) %>% 
-    dplyr::select(fraction, treatment, starts_with("diff")) %>% 
-    pivot_longer(-c(fraction, treatment), values_to = "diff_ug_g", names_to = "type") %>% 
-    
-    ggplot(aes(x = treatment, y = diff_ug_g))+
-    geom_point(aes(color = fraction))+
-    labs(x = "", y = "13C difference (μg/g)")+
-    scale_x_discrete(labels = c("T0", "W", "D", "DW"))+
-    #scale_y_log10()+
-    #scale_fill_manual(values = pnw_palette("Sunset", 3))+
-    scale_fill_manual(values = soilpalettes::soil_palette("redox2", 3))+
-    scale_color_manual(values = soilpalettes::soil_palette("redox2", 3))+
-    facet_wrap(~type)+
-    theme_kp()+
-    #theme(axis.text.x = element_text(angle = 45))+
-    NULL
-  
-  
-  
-  combined_data_processed %>% 
-    filter(!(type == "sorbed-C" & treatment == "3-drying" & fraction == "respiration")) %>%
-    group_by(type, fraction, treatment) %>% 
 
-    ggplot(aes(x = treatment, y = C13_mg_g*1000))+
-    geom_point(aes(color = fraction), position = position_dodge(width = 0.3))+
-    labs(x = "", y = "13C difference (μg/g)")+
-    scale_x_discrete(labels = c("T0", "W", "D", "DW"))+
-    scale_y_log10()+
-    #scale_fill_manual(values = pnw_palette("Sunset", 3))+
-    scale_fill_manual(values = soilpalettes::soil_palette("redox2", 3))+
-    scale_color_manual(values = soilpalettes::soil_palette("redox2", 3))+
-    facet_wrap(~type)+
-    theme_kp()+
-    #theme(axis.text.x = element_text(angle = 45))+
-    NULL
-  
-  
-  
-  solutionc = combined_data_processed %>% filter(type == "solution-C")
 
+
+combined_data_processed %>% 
+  filter(type != "solution-C" & !(fraction == "respiration" & treatment == "3-drying")) %>% 
+  ggplot(aes(x = treatment, y = C13_mg_g*1000))+
+  #    geom_bar(aes(fill = fraction, color = fraction), stat = "identity", position = position_dodge(width = 0.7), 
+  #             width = 0.5, alpha = 0.7, size = 0.7)+
+  geom_point(aes(color = fraction))+
+  #geom_text(data = label %>%  filter(type != "solution-C"), aes(y = 2.95, label = C13_mg_g*1000))+
+  #annotate("text", label = "total 13C in soil (μg/g):", x = 0.7, y = 3.10, hjust = 0)+
+  labs(x = "", y = "13C (μg/g)")+
+  scale_x_discrete(labels = c("T0", "W", "D", "DW"))+
+  scale_y_log10()+
+  #scale_fill_manual(values = pnw_palette("Sunset", 3))+
+  scale_fill_manual(values = soilpalettes::soil_palette("redox2", 3))+
+  scale_color_manual(values = soilpalettes::soil_palette("redox2", 3))+
+  facet_wrap(~type)+
+  theme_kp()+
+  #theme(axis.text.x = element_text(angle = 45))+
+  NULL
+
+
+combined_data_processed %>% 
+  filter(type != "solution-C" & !(treatment == "3-drying")) %>%
+  group_by(type, fraction, treatment) %>% 
+  dplyr::summarise(C13 = mean(C13_mg_g*1000)) %>% 
+  pivot_wider(names_from = "type", values_from = "C13") %>% 
+  mutate(diff_ug_g = `sorbed-C` - control) %>% 
   
-  summary(aov((C13_mg_g) ~ treatment, data = solutionc %>%  filter(fraction == "weoc")))  
+  ggplot(aes(x = treatment, y = diff_ug_g))+
+  geom_point(aes(color = fraction))+
+  labs(x = "", y = "13C difference (μg/g)")+
+  scale_x_discrete(labels = c("T0", "W", "D", "DW"))+
+  #scale_y_log10()+
+  #scale_fill_manual(values = pnw_palette("Sunset", 3))+
+  scale_fill_manual(values = soilpalettes::soil_palette("redox2", 3))+
+  scale_color_manual(values = soilpalettes::soil_palette("redox2", 3))+
+  #facet_wrap(~type)+
+  theme_kp()+
+  #theme(axis.text.x = element_text(angle = 45))+
+  NULL
+
+
+
+combined_data_processed %>% 
+  filter(type != "sorbed-C" & (treatment %in% c("1-time-zero", "2-wetting"))) %>%
+  group_by(type, fraction, treatment) %>% 
+  dplyr::summarise(C13 = mean(C13_mg_g*1000)) %>% 
+  pivot_wider(names_from = "type", values_from = "C13") %>% 
+  mutate(diff_ug_g = `solution-C` - control) %>% 
   
+  ggplot(aes(x = treatment, y = diff_ug_g))+
+  geom_point(aes(color = fraction))+
+  labs(x = "", y = "13C difference (μg/g)")+
+  scale_x_discrete(labels = c("T0", "+C"))+
+  #scale_y_log10()+
+  #scale_fill_manual(values = pnw_palette("Sunset", 3))+
+  scale_fill_manual(values = soilpalettes::soil_palette("redox2", 3))+
+  scale_color_manual(values = soilpalettes::soil_palette("redox2", 3))+
+  #facet_wrap(~type)+
+  theme_kp()+
+  #theme(axis.text.x = element_text(angle = 45))+
+  NULL
+
+
+
+combined_data_processed %>% 
+  #filter(type != "sorbed-C" & (treatment %in% c("1-time-zero", "2-wetting"))) %>%
+  group_by(type, fraction, treatment) %>% 
+  dplyr::summarise(C13 = mean(C13_mg_g*1000)) %>% 
+  pivot_wider(names_from = "type", values_from = "C13") %>% 
+  mutate(diff_sol_ug_g = `solution-C` - control,
+         diff_sor_ug_g = `sorbed-C` - control) %>% 
+  dplyr::select(fraction, treatment, starts_with("diff")) %>% 
+  pivot_longer(-c(fraction, treatment), values_to = "diff_ug_g", names_to = "type") %>% 
+  
+  ggplot(aes(x = treatment, y = diff_ug_g))+
+  geom_point(aes(color = fraction))+
+  labs(x = "", y = "13C difference (μg/g)")+
+  scale_x_discrete(labels = c("T0", "W", "D", "DW"))+
+  #scale_y_log10()+
+  #scale_fill_manual(values = pnw_palette("Sunset", 3))+
+  scale_fill_manual(values = soilpalettes::soil_palette("redox2", 3))+
+  scale_color_manual(values = soilpalettes::soil_palette("redox2", 3))+
+  facet_wrap(~type)+
+  theme_kp()+
+  #theme(axis.text.x = element_text(angle = 45))+
+  NULL
+
+
+
+combined_data_processed %>% 
+  filter(!(type == "sorbed-C" & treatment == "3-drying" & fraction == "respiration")) %>%
+  group_by(type, fraction, treatment) %>% 
+  
+  ggplot(aes(x = treatment, y = C13_mg_g*1000))+
+  geom_point(aes(color = fraction), position = position_dodge(width = 0.3))+
+  labs(x = "", y = "13C difference (μg/g)")+
+  scale_x_discrete(labels = c("T0", "W", "D", "DW"))+
+  scale_y_log10()+
+  #scale_fill_manual(values = pnw_palette("Sunset", 3))+
+  scale_fill_manual(values = soilpalettes::soil_palette("redox2", 3))+
+  scale_color_manual(values = soilpalettes::soil_palette("redox2", 3))+
+  facet_wrap(~type)+
+  theme_kp()+
+  #theme(axis.text.x = element_text(angle = 45))+
+  NULL
+
+
+
+solutionc = combined_data_processed %>% filter(type == "solution-C")
+
+
+summary(aov((C13_mg_g) ~ treatment, data = solutionc %>%  filter(fraction == "weoc")))  
+
+
+
+goethite = tribble(
+  ~g_perc, ~d13C,
+  1.5, -27.63,
+  1.5, -27.72,
+  1.5, -29.30,
+  7.5, -30.46,
+  7.5, -27.41,
+  7.5, -26.88,
+  13, -26.03,
+  13, -24.42,
+  13, -28.01,
+  20, -26.62,
+  50, -27.43,
+  0, -27.00,
+  0, -27.32,
+  100, -23.68,
+  100, -23.80,
+  100, -24.20
+)
+
+
+goethite %>% 
+  ggplot(aes(x = g_perc, y = d13C))+
+  geom_point()
+
+
+
+# alternate drying/rewetting plot -----------------------------------------
+
+drying_rewetting_data = 
+  combined_data_processed %>% 
+  mutate(trt = case_when(type == "control" & treatment == "1-time-zero" ~ "baseline",
+                         type == "sorbed-C" & (treatment == "1-time-zero" | treatment == "2-wetting") ~ "wetting",
+                         type == "sorbed-C" & (treatment == "3-drying" | treatment == "4-drying-rewetting") ~ "drying")) %>% 
+  filter(!is.na(trt)) %>% 
+  mutate(level = case_when(trt == "baseline" ~ "baseline",
+                           treatment == "1-time-zero" | treatment == "3-drying" ~ "TO",
+                           treatment == "2-wetting" | treatment == "4-drying-rewetting" ~ "wet",
+                           ))
+
+drying_rewetting_data %>% 
+  ggplot(aes(x = trt, y = d13C_VPDB, color = level))+
+  geom_point(position = position_dodge(width = 0.4))+
+  facet_grid(fraction ~., scales = "free_y")+
+  theme_kp()
+
+drying_rewetting_data %>% 
+  ggplot(aes(x = trt, y = C_mg_g, color = level))+
+  geom_point(position = position_dodge(width = 0.4))+
+  facet_grid(fraction ~., scales = "free_y")+
+  theme_kp()
+
