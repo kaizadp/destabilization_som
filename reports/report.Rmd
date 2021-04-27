@@ -381,6 +381,18 @@ combined_data_processed_summary %>%
   theme_kp()+
   theme(axis.text.x = element_text(angle = 45))+
   NULL
+
+
+
+## priming
+combined_data_processed_summary %>% 
+  filter(fraction != "soil" & type == "priming") %>% 
+  ggplot(aes(x = treatment, y = C13_mg_g*1000, fill = fraction))+
+  geom_bar(stat = "identity")+
+  facet_wrap(~type)+
+  theme_kp()+
+  theme(axis.text.x = element_text(angle = 45))+
+  NULL
 ```
 
 
