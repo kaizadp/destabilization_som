@@ -1,0 +1,26 @@
+---
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE,
+                      message = FALSE,
+                      warning = FALSE)
+```
+
+## HYPOTHESES
+
+
+---
+
+---
+
+```{r}
+readd(gg_priming)
+```
+
+```{r}
+readd(gg_mass_balance)$combined_data2_summarytable %>% 
+  knitr::kable()
+```
+
