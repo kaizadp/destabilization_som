@@ -24,7 +24,10 @@ library(googlesheets4)
 ## 1. core info ---------------------------------------------------------------
 core_key = read_sheet("1k7-Xdav-tRB13cyf3As_MOUk339u3XUuUrPmRwOg7AU") %>% 
   mutate(type = recode(type, "desorption" = "sorbed-C", "priming" = "solution-C")) %>% 
-  write.csv(COREKEY, row.names = F)
+  mutate(substrate_maoc_id = treatment == "2-wetting") %>% 
+  filter(substrate_maoc_id) %>% 
+  dplyr::select(-substrate_maoc_id) %>% 
+  write.csv(COREKEY, row.names = F, na = "")
 
 core_weights = read_sheet("1PR-VvyKcZIYoH3VF8bBWmzkmAnPibf0Fyd_EVrEqvcc")
 core_weights %>% 
