@@ -65,6 +65,7 @@ make(picarro_plan)
 
 
 loadd(ghg_fluxes)
+ghg_fluxes2 = ghg_fluxes %>% distinct()
 
 ghg_fluxes2 %>% 
   filter(treatment_mgC <= 5) %>% 
@@ -74,7 +75,6 @@ ghg_fluxes2 %>%
   scale_color_manual(values = PNWColors::pnw_palette("Sunset2", 3))+
   facet_grid(.~goethite)
 
-ghg_fluxes2 = ghg_fluxes %>% distinct()
 
 ghg_fluxes2_2_5 = 
   ghg_fluxes2 %>% 
@@ -122,7 +122,7 @@ cumflux %>%
   ggplot(aes(x = DATETIME, y = cum_evolved_mg_g, color = as.character(treatment_mgC)))+
   geom_path()+
   facet_grid(. ~ goethite)+
-  theme_bw()+
+  theme_kp()+
   NULL
   
   
@@ -137,8 +137,39 @@ summary(b)
 
 agricolae::HSD.test(b, "treatment_mgC") %>% print()  
   
+cumflux %>%
+  group_by(Core) %>% 
+  filter(cum_evolved_mg_g == max(cum_evolved_mg_g)) %$%
+  nlme::lme(cum_evolved_mg_g ~ goethite, random = ~1|treatment_mgC) %>% 
+  anova()
+
+
+  
+cumflux2 = 
+  cumflux %>% 
+  group_by(Core) %>% 
+  mutate(elapsed_sec = difftime(DATETIME, min(DATETIME)),
+         elapsed_hr = as.numeric(elapsed_sec)/3600) %>% 
+  mutate(treatment_mgC = as.factor(treatment_mgC),
+         treatment_mgC = fct_reorder(treatment_mgC, as.numeric(treatment_mgC)))
   
   
+cumflux2 %>% 
+  #filter(treatment_mgC <= 5) %>% 
+  ggplot(aes(x = elapsed_hr, y = cum_evolved_umol_g*1000, color = (treatment_mgC)))+
+  geom_path()+
+   scale_color_manual(values = PNWColors::pnw_palette("Sailboat", 7))+
+  # scale_color_viridis_d(option = "cividis", direction = -1)+
+  labs(title = "Respiration response to glucose addition \n",
+       x = "Elapsed hours",
+       y = expression(bold("Cumulative CO"[2] * "-C evolved, nmol g" ^-1)),
+       color = "mg C added")+
   
+  facet_grid(. ~ goethite)+
+  theme_kp()+
+  theme(legend.position = "right",
+        plot.title = element_text(hjust = 0),
+        legend.title = element_text()) +
+  NULL
   
 
