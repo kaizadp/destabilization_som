@@ -21,7 +21,8 @@ library(PNWColors)
 
 # respiration functions -- computing ---------------------------------------------------
 
-clean_lgr_output = function(resp_lgr){
+clean_lgr_output_OLD = function(resp_lgr){
+  ## This was the OLD clean_lgr_output function, now defunct
   resp_lgr %>% 
     filter(!is.na(ID)) %>% 
     rename(CO2_626_ppm = `X.CO2_626._ppm`,
@@ -36,6 +37,18 @@ clean_lgr_output = function(resp_lgr){
     dplyr::select(core, D13C_VPDB_CO2) %>% 
     group_by(core) %>% 
     dplyr::summarise(D13C_VPDB_CO2 = mean(D13C_VPDB_CO2))
+}
+clean_lgr_output = function(resp, core_key){
+    resp %>% 
+    dplyr::select(lgr_id, c13_co2_permil) %>% 
+    rename(ID = lgr_id,
+           D13C_VPDB_CO2 = c13_co2_permil) %>% 
+    filter(!grepl(" B", ID) & !grepl("ambient", ID)) %>% 
+    separate(ID, sep = ": ", into = c("core", "B")) %>% 
+    dplyr::select(core, D13C_VPDB_CO2) %>% 
+    mutate(D13C_VPDB_CO2 = round(D13C_VPDB_CO2, 2)) %>% 
+    # keep only the samples we want
+    right_join(core_key %>% dplyr::select(core))
 }
 
 # the calculate_RC13 function (below) is rendered redundant by the D13C_VPDB in the `resp_lgr` file
@@ -84,7 +97,7 @@ clean_licor_output_x = function(resp_licor){
            CO2_ppm = CO2_ppm - ambient)
     
 }
-clean_licor_output = function(resp_licor){
+clean_licor_output = function(resp_licor, core_key){
   ## we calculate the partial pressure of CO2 using the formula:
   ## CO2_post = [(V_eff * CO2_initial) + (V_inj * pCO2)]/[V_eff + V_inj]
   ## therefore, pCO2 = [{V_eff * (CO2_final - CO2_initial)} + (V_inj * CO2_final)] / V_inj
@@ -114,7 +127,9 @@ clean_licor_output = function(resp_licor){
   
   resp_licor_temp %>% 
     mutate(pCO2_ppm = pCO2_ppm - ambient_pCO2) %>% 
-    dplyr::select(core, pCO2_ppm)
+    dplyr::select(core, pCO2_ppm) %>% 
+    # keep only the samples we want
+    right_join(core_key %>% dplyr::select(core))
   
 }
 

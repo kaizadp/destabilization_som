@@ -40,7 +40,7 @@ do_calibration = function(dat){
        calib_plot = calib_plot)
 }
 
-process_weoc_files = function(irms_weoc_report, tc_weoc_report, weoc_traykey){
+process_weoc_files = function(irms_weoc_report, tc_weoc_report, weoc_traykey, core_key){
   
   # 1. IRMS --------------------------------------------------------------------
   C_VPDB = 0.011237
@@ -56,6 +56,7 @@ process_weoc_files = function(irms_weoc_report, tc_weoc_report, weoc_traykey){
   #    R13C = ((d13C_VPDB/1000) + 1) * C_VPDB,
   #    R13C = round(R13C, 6)) %>% 
     dplyr::select(core, weoc_rep, d13C_VPDB) %>% 
+    right_join(core_key %>% dplyr::select(core)) %>% 
     mutate(core = as.character(core))
   
   ## b. make wide form with measures of variance, for QC
@@ -115,6 +116,7 @@ process_weoc_files = function(irms_weoc_report, tc_weoc_report, weoc_traykey){
     mutate(C_mg_calc = round(C_area*SLOPE_weoc + INTERCEPT_weoc, 3)) %>% 
     left_join(weoc_traykey, by = c("Name" = "name")) %>% 
     filter(!is.na(core)) %>% 
+    right_join(core_key %>% dplyr::select(core)) %>% 
     mutate(core = as.character(core)) %>% 
     dplyr::select(core, weoc_rep, weight_mg, C_mg_calc)
   
@@ -129,6 +131,7 @@ process_weoc_files = function(irms_weoc_report, tc_weoc_report, weoc_traykey){
   weoc_subsampling2 = 
     weoc_subsampling %>% 
     dplyr::select(core, weoc_g, moisture_perc) %>% 
+    right_join(core_key %>% dplyr::select(core)) %>% 
     drop_na() %>% 
     mutate(core = as.character(core),
            moisture_perc = round(moisture_perc,2),
@@ -143,6 +146,7 @@ process_weoc_files = function(irms_weoc_report, tc_weoc_report, weoc_traykey){
     weoc_capsuleweights %>% 
     dplyr::select(core, weoc_rep, wt_filtered_extract_g) %>% 
     filter(weoc_rep %in% c("A", "B", "C")) %>% 
+    right_join(core_key %>% dplyr::select(core)) %>% 
     mutate(core = as.character(core)) %>% 
     drop_na()
   
@@ -213,7 +217,7 @@ process_weoc_files = function(irms_weoc_report, tc_weoc_report, weoc_traykey){
   )
 }
 
-process_soil_files = function(irms_soil_report, tc_soil_report, soil_traykey){
+process_soil_files = function(irms_soil_report, tc_soil_report, soil_traykey, core_key){
   
   # 1. IRMS --------------------------------------------------------------------
   C_VPDB = 0.011237
@@ -230,7 +234,8 @@ process_soil_files = function(irms_soil_report, tc_soil_report, soil_traykey){
       rep = vec,
       # R13C = ((d13C_VPDB/1000) + 1) * C_VPDB, R13C = round(R13C, 6)
       ) %>% 
-    dplyr::select(core, rep, d13C_VPDB)
+    dplyr::select(core, rep, d13C_VPDB) %>% 
+    right_join(core_key %>% dplyr::select(core))
   
   ## b. make wide form with measures of variance
   irms_soil_cv = 
@@ -289,7 +294,8 @@ process_soil_files = function(irms_soil_report, tc_soil_report, soil_traykey){
     mutate(rep = vec,
            totalC_perc = round((C_mg_calc/weight_mg)*100, 2)) %>% 
     #mutate(core = as.character(core)) %>% 
-    dplyr::select(core, rep, weight_mg, C_mg_calc, totalC_perc)
+    dplyr::select(core, rep, weight_mg, C_mg_calc, totalC_perc) %>% 
+    right_join(core_key %>% dplyr::select(core))
   
   ## b. make wide form with cv, sd
   tc_soil_cv = 
@@ -320,7 +326,7 @@ process_soil_files = function(irms_soil_report, tc_soil_report, soil_traykey){
   )
 }
 
-process_weoc_pellet_files = function(irms_weoc_pellet_report, tc_weoc_pellet_report, weoc_pellet_traykey){
+process_weoc_pellet_files = function(irms_weoc_pellet_report, tc_weoc_pellet_report, weoc_pellet_traykey, core_key){
   
   # 1. IRMS --------------------------------------------------------------------
   C_VPDB = 0.011237
@@ -338,7 +344,8 @@ process_weoc_pellet_files = function(irms_weoc_pellet_report, tc_weoc_pellet_rep
       rep = vec,
       # R13C = ((d13C_VPDB/1000) + 1) * C_VPDB, R13C = round(R13C, 6)
     ) %>% 
-    dplyr::select(core, rep, d13C_VPDB)
+    dplyr::select(core, rep, d13C_VPDB) %>% 
+    right_join(core_key %>% dplyr::select(core))
   
   ## b. make wide form with measures of variance
   irms_weoc_pellet_cv = 
@@ -375,7 +382,8 @@ process_weoc_pellet_files = function(irms_weoc_pellet_report, tc_weoc_pellet_rep
     mutate(rep = vec) %>% 
     filter(Memo != "skip") %>% 
     #mutate(core = as.character(core)) %>% 
-    dplyr::select(core, rep, weight_mg, C_mg_calc, totalC_perc)
+    dplyr::select(core, rep, weight_mg, C_mg_calc, totalC_perc) %>% 
+    right_join(core_key %>% dplyr::select(core))
   
   ## b. make wide form with cv, sd
   tc_weoc_pellet_cv = 

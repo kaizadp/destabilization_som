@@ -27,19 +27,20 @@ source("code/2b-irms_processing_functions.R")
 # respiration processing plan ---------------------------------------------------------------------
 respiration_processing_plan = 
   drake_plan(
-    core_key = read.csv(file_in("data/core_key.csv")) %>%  mutate(core = as.character(core)) %>% 
-      filter(skip != "skip"),
+    core_key = read.csv(file_in("data/core_key.csv")) %>%  mutate(core = as.character(core)),
+    # %>% filter(skip != "skip"),
     #headspace = read.csv("data/respiration_headspace.csv"),
     headspace = read.csv("data/core_weights.csv") %>% dplyr::select(core, headspace_cm3) %>% 
       mutate(core = as.character(core)),
     core_weights = read.csv("data/processed/core_weights.csv") %>% mutate(core = as.character(core)),
-    resp_lgr = read.csv("data/respiration_lgr_output.csv"),
+    #resp_lgr = read.csv("data/respiration_lgr_output.csv"),
+    resp = read.csv("data/respiration.csv"),
     resp_licor = read.csv("data/respiration_licor_output.csv"),
     
-    lgr_clean = clean_lgr_output(resp_lgr),
+    lgr_clean = clean_lgr_output(resp, core_key),
     #lgr_calc = calculate_RC13(lgr_clean),
     
-    licor_clean = clean_licor_output(resp_licor),
+    licor_clean = clean_licor_output(resp_licor, core_key),
     licor_moles = calculate_moles_CO2C(headspace, licor_clean, core_weights),
     
     combined_lgr_licor = left_join(lgr_clean, licor_moles, by = "core"), 
@@ -85,16 +86,16 @@ soilc_plan =
     #
     # 2. WEOC -----------------------------------------------------------------
     ## a. process
-    weoc_combined = process_weoc_files(irms_weoc_report, tc_weoc_report, weoc_traykey)$weoc_combined,
+    weoc_combined = process_weoc_files(irms_weoc_report, tc_weoc_report, weoc_traykey, core_key)$weoc_combined,
     weoc_calibration = do_calibration(tc_weoc_report),
     
     ## b. plot
     # gg_weoc = plot_weoc(weoc_combined, core_key),
     
     ## c. output
-    irms_weoc_processed = process_weoc_files(irms_weoc_report, tc_weoc_report, weoc_traykey)$irms_weoc_wide %>% 
+    irms_weoc_processed = process_weoc_files(irms_weoc_report, tc_weoc_report, weoc_traykey, core_key)$irms_weoc_wide %>% 
       write.csv("data/processed/weoc_irms_wide.csv", row.names = F),
-    tc_weoc_processed = process_weoc_files(irms_weoc_report, tc_weoc_report, weoc_traykey)$tc_weoc_wide %>% 
+    tc_weoc_processed = process_weoc_files(irms_weoc_report, tc_weoc_report, weoc_traykey, core_key)$tc_weoc_wide %>% 
       write.csv("data/processed/weoc_tc_wide.csv", row.names = F),
     weoc_combined %>% 
       write.csv(WEOC_PROCESSED, row.names = F),
@@ -102,7 +103,7 @@ soilc_plan =
     #
     # 3. SOIL -----------------------------------------------------------------
     ## a. process
-    soil_combined = process_soil_files(irms_soil_report, tc_soil_report, soil_traykey)$soil_combined,
+    soil_combined = process_soil_files(irms_soil_report, tc_soil_report, soil_traykey, core_key)$soil_combined,
     soil_calibration = do_calibration(tc_soil_report),
     
     ## b. plot
@@ -115,7 +116,7 @@ soilc_plan =
     #
     # 4. WEOC PELLETS -----------------------------------------------------------------
     ## a. process
-    weoc_pellet_combined = process_weoc_pellet_files(irms_weoc_pellet_report, tc_weoc_pellet_report, weoc_pellet_traykey)$weoc_pellet_combined,
+    weoc_pellet_combined = process_weoc_pellet_files(irms_weoc_pellet_report, tc_weoc_pellet_report, weoc_pellet_traykey, core_key)$weoc_pellet_combined,
 
     ## b. plot
 

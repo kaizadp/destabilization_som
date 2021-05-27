@@ -2,6 +2,13 @@ source("code/0-packages.R")
 library(outliers)
 library(agricolae)
 
+
+reorder_factors = function(dat){
+  dat %>% 
+    mutate(fraction = factor(fraction, levels = c("respiration", "weoc", "weoc_pellet", "soil")),
+           type = factor(type, levels = c("control", "sorbed-C", "solution-C")))
+}
+
 # combine and process files -----------------------------------------------------------
 
 combine_data = function(soil, weoc, weoc_pellet, respiration, core_key, core_weights){
@@ -36,7 +43,8 @@ combine_data = function(soil, weoc, weoc_pellet, respiration, core_key, core_wei
     rename(C_mg_g = CO2C_mg_g,
            d13C_VPDB = D13C_VPDB_CO2) %>% 
     mutate(fraction = "respiration") %>% 
-    dplyr::select(core, fraction, C_mg_g, d13C_VPDB)
+    dplyr::select(core, fraction, C_mg_g, d13C_VPDB) %>% 
+    mutate(core = as.character(core))
   
   combined = 
     bind_rows(soil_new, weoc_new, weoc_pellet_new, respiration_new) %>% 
