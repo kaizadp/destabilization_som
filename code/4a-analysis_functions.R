@@ -457,16 +457,40 @@ calculate_mdc = function(tail, alpha, power, pre, post){
 calculate_mdc(tail = 2,
               alpha = 0.05,
               power = 0.80,
-              pre = combined_data_processed %>% filter(core %in% c(21, 23, 25)) %>% pull(C13_ug_g),
-              post = combined_data_processed %>% filter(core %in% c(6, 7, 9)) %>% pull(C13_ug_g)
-              )
+              pre = combined_data_processed %>% filter(type == "control" & fraction == "weoc_pellet") %>% 
+                mutate(C13_ug_g = C13_mg_g*1000) %>% pull(C13_ug_g),
+              post = combined_data_processed %>% filter(type == "sorbed-C" & fraction == "weoc_pellet") %>% 
+                mutate(C13_ug_g = C13_mg_g*1000) %>% pull(C13_ug_g)
+)
 
 
 calculate_mdc(tail = 2,
               alpha = 0.05,
               power = 0.80,
-              pre = combined %>% filter(core %in% c(21, 23, 25)) %>% pull(C_mg_g),
-              post = combined %>% filter(core %in% c(6, 7, 9)) %>% pull(C_mg_g)
+              pre = combined_data_processed %>% filter(type == "control" & fraction == "weoc_pellet") %>% 
+                mutate(C13_ug_g = C13_mg_g*1000) %>% pull(C13_ug_g),
+              post = combined_data_processed %>% filter(type == "solution-C" & fraction == "weoc_pellet") %>% 
+                mutate(C13_ug_g = C13_mg_g*1000) %>% pull(C13_ug_g)
 )
 
 
+
+# STATS -------------------------------------------------------------------
+
+combined_data_processed %>% 
+  filter(fraction == "respiration") %$% 
+  aov((C_mg_g) ~ type) %>% 
+  summary()
+
+combined_data_processed %>% 
+  filter(fraction == "respiration") %$% 
+  aov((d13C_VPDB) ~ type) %>% 
+  summary()
+
+combined_data_processed %>% 
+  group_by(type, fraction) %>% 
+  dplyr::summarise(d13C = mean(d13C_VPDB))
+
+combined_data_processed %>% 
+  filter(fraction == "weoc" & type != "control") %$% 
+  var.test(d13C_VPDB ~ type, alternative = "two.sided") 
