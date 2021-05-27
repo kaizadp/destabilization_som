@@ -18,7 +18,8 @@ analysis_plan = drake_plan(
   combined_data = combine_data(soil, weoc, weoc_pellet, respiration, core_key, core_weights),
   combined_data_outliers = remove_outliers(combined_data),
   combined_data_processed = calculate_indices(combined_data_outliers),
-  
+  combined_data_processed %>% write.csv("data/processed/combined_data_processed.csv", row.names = FALSE),
+    
   # 3 
   #gg_prelim = make_graphs_prelim(combined_data_processed),
   # gg_desorption = make_graphs_desorption(combined_data_processed),
