@@ -486,7 +486,7 @@ calculate_mdc(tail = 2,
 # STATS -------------------------------------------------------------------
 
 combined_data_processed %>% 
-  filter(fraction == "respiration") %$% 
+  filter(fraction == "respiration" & core != 6) %$% 
   aov((C_mg_g) ~ type) %>% 
   summary()
 
