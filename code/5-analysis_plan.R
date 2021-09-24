@@ -40,3 +40,10 @@ analysis_plan = drake_plan(
 )
 
 make(analysis_plan)
+
+
+combined_data_processed %>% 
+  group_by(type, fraction) %>% 
+  dplyr::summarise(d13C = mean(d13C_VPDB),
+                   d13C_se = sd(d13C_VPDB)/sqrt(n())) %>% 
+  knitr::kable()
